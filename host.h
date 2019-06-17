@@ -2,7 +2,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    long startpowershell();
+    typedef const wchar_t* StringPtr;
+    long startpowershell(StringPtr);
 #ifdef __cplusplus
 }
 #endif
