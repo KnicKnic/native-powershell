@@ -1,2 +1,4 @@
 EXPORTS
 	startpowershell
+	CreateRunspace
+	DeleteRunspace
