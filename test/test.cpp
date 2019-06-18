@@ -7,8 +7,8 @@ int main()
 {
     auto runspace = CreateRunspace();
     auto powershell = CreatePowershell(runspace);
-    AddCommand(powershell, L"dir");
-    AddArgument(powershell, L"c:\\ddddddd");
+    AddScript(powershell, L"c:\\code\\psh_host\\script.ps1");
+    //AddArgument(powershell, L"c:\\ddddddd");
     InvokeCommand(powershell);
     std::cout << "Hello World!\n"; 
 }

@@ -133,6 +133,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="host.h" />
+    <ClInclude Include="my_host.h" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Management.Automation">

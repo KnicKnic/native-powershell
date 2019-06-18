@@ -10,6 +10,14 @@
 using namespace System::Management::Automation::Runspaces;
 using namespace System::Management::Automation;
 
+
+using namespace System;
+using namespace System::Collections::Generic;
+using namespace System::Globalization;
+using namespace System::Management::Automation;
+using namespace System::Management::Automation::Host;
+#include "my_host.h"
+
 template<typename T,typename X>
 T MakeHandle(X x) {
 	return (T)x;
@@ -101,10 +109,17 @@ long AddCommand(PowershellHandle handle, StringPtr command)
 }
 long AddArgument(PowershellHandle handle, StringPtr argument)
 {
-	auto managedArgument = msclr::interop::marshal_as<System::String^>(argument);
-	auto powershell = HandleTable::GetPowershell(handle);
-	powershell->AddArgument(managedArgument);
-	return 0;
+    auto managedArgument = msclr::interop::marshal_as<System::String^>(argument);
+    auto powershell = HandleTable::GetPowershell(handle);
+    powershell->AddArgument(managedArgument);
+    return 0;
+}
+long AddScript(PowershellHandle handle, StringPtr path, bool useLocalScope)
+{
+    auto managedPath = msclr::interop::marshal_as<System::String^>(path);
+    auto powershell = HandleTable::GetPowershell(handle);
+    powershell->AddScript(managedPath, useLocalScope);
+    return 0;
 }
 long InvokeCommand(PowershellHandle handle)
 {
@@ -119,10 +134,17 @@ long InvokeCommand(PowershellHandle handle)
             System::Console::WriteLine(object->BaseObject->GetType()->ToString());
         }
     }
-    catch (System::Object^ object) {
-        System::Console::WriteLine("Caught Exception");
-        System::Console::WriteLine(object->ToString());
-        System::Console::WriteLine(object->GetType()->ToString());
+    catch (System::Management::Automation::RuntimeException^ exception) {
+        System::Console::WriteLine("Caught Exception of type " + exception->GetType()->ToString());
+        System::Console::WriteLine(exception->ToString());
+        if (exception->ErrorRecord) {
+            System::Console::WriteLine("Powershell stack trace");
+            System::Console::WriteLine(exception->ErrorRecord->ScriptStackTrace);
+        }
+    }
+    catch (System::Object^ exception) {
+        System::Console::WriteLine("Caught Exception of type " + exception->GetType()->ToString());
+        System::Console::WriteLine(exception->ToString());
 
     }
 	return 0;
@@ -144,7 +166,7 @@ void DeletePowershell(PowershellHandle handle)
 
 RunspaceHandle CreateRunspace()
 {
-	Runspace^ runspace = RunspaceFactory::CreateRunspace();
+	Runspace^ runspace = RunspaceFactory::CreateRunspace(gcnew MyHost());
 	runspace->Open();
 	return HandleTable::InsertRunspace(runspace);
 }

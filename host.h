@@ -26,6 +26,7 @@ extern "C" {
 	long AddCommand(PowershellHandle handle, StringPtr command);
 	long AddArgument(PowershellHandle handle, StringPtr argument);
 	long InvokeCommand(PowershellHandle handle);
+    long AddScript(PowershellHandle handle, StringPtr path, bool useLocalScope = false);
 
 #ifdef __cplusplus
 }
