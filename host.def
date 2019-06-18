@@ -2,3 +2,6 @@ EXPORTS
 	startpowershell
 	CreateRunspace
 	DeleteRunspace
+	CreatePowershell
+	DeletePowershell
+	MakeDir

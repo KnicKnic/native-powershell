@@ -25,6 +25,7 @@ public ref class HandleTable {
 
 public:
 	static System::Collections::Concurrent::ConcurrentDictionary<long long, Runspace^>^ runspaces = gcnew System::Collections::Concurrent::ConcurrentDictionary<long long, Runspace^>();
+	static System::Collections::Concurrent::ConcurrentDictionary<long long, PowerShell^>^ powershells = gcnew System::Collections::Concurrent::ConcurrentDictionary<long long, PowerShell^>();
 	/*static HandleTable() {
 		runspaces = ;
 	}*/
@@ -52,11 +53,45 @@ public:
 		printf("Removed runspace\n");
 		return runspace;
 	}
+	static PowershellHandle InsertPowershell(PowerShell^ powershell) {
+		auto index = System::Threading::Interlocked::Increment(powershellIndex);
+		powershells[index] = powershell;
+		return MakeHandle<PowershellHandle>(index);
+	}
+	static PowerShell^ GetPowershell(PowershellHandle handle) {
+		PowerShell^ powershell;
+		if (!powershells->TryGetValue(GetHandle(handle), powershell))
+		{
+			throw "Key Not found";
+		}
+		return powershell;
+	}
+	static PowerShell^ RemovePowershell(PowershellHandle handle) {
+		PowerShell^ powershell;
+		printf("About to remove powershell\n");
+		if (!powershells->TryRemove(GetHandle(handle), powershell))
+		{
+			printf("Remove powershell error\n");
+			throw "Key Not found";
+		}
+		printf("Removed powershell\n");
+		return powershell;
+	}
 private:
 
 	static long long runspaceIndex = 0;
+	static long long powershellIndex = 0;
 };
 
+long MakeDir(PowershellHandle handle, StringPtr path)
+{
+	auto managedPath = msclr::interop::marshal_as<System::String^>(path);
+	auto powershell = HandleTable::GetPowershell(handle);
+	powershell->AddCommand("mkdir");
+	powershell->AddArgument(managedPath);
+	powershell->Invoke();
+	return 0;
+}
 
 long startpowershell(RunspaceHandle handle, StringPtr str) {
     auto managedStr = msclr::interop::marshal_as<System::String^>(str);
@@ -67,6 +102,19 @@ long startpowershell(RunspaceHandle handle, StringPtr str) {
     return 0;
 
 }
+PowershellHandle CreatePowershell(RunspaceHandle handle)
+{
+	auto powershell = PowerShell::Create();
+	powershell->Runspace = HandleTable::GetRunspace(handle);
+	return HandleTable::InsertPowershell(powershell);
+}
+
+
+void DeletePowershell(PowershellHandle handle)
+{
+	HandleTable::RemovePowershell(handle)->Stop();
+}
+
 
 RunspaceHandle CreateRunspace()
 {
