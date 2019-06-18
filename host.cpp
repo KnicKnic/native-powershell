@@ -109,7 +109,23 @@ long AddArgument(PowershellHandle handle, StringPtr argument)
 long InvokeCommand(PowershellHandle handle)
 {
 	auto powershell = HandleTable::GetPowershell(handle);
-	powershell->Invoke();
+    try {
+        PSInvocationSettings::
+        auto results = powershell->Invoke(;
+        for each (auto object in results) {
+
+            System::Console::WriteLine("Got Object");
+            System::Console::WriteLine(object->ToString());
+            System::Console::WriteLine(object->GetType()->ToString());
+            System::Console::WriteLine(object->BaseObject->GetType()->ToString());
+        }
+    }
+    catch (System::Object^ object) {
+        System::Console::WriteLine("Caught Exception");
+        System::Console::WriteLine(object->ToString());
+        System::Console::WriteLine(object->GetType()->ToString());
+
+    }
 	return 0;
 }
 
