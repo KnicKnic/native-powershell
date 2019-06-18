@@ -18,6 +18,9 @@
     <ClCompile Include="host.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="my_host.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="host.h">

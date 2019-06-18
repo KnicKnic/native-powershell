@@ -129,6 +129,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="host.cpp" />
+    <ClCompile Include="my_host.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="host.h" />

@@ -110,8 +110,7 @@ long InvokeCommand(PowershellHandle handle)
 {
 	auto powershell = HandleTable::GetPowershell(handle);
     try {
-        PSInvocationSettings::
-        auto results = powershell->Invoke(;
+        auto results = powershell->Invoke();
         for each (auto object in results) {
 
             System::Console::WriteLine("Got Object");
