@@ -22,7 +22,11 @@ extern "C" {
 
 	void DeleteRunspace(RunspaceHandle handle);
 
-	long startpowershell(RunspaceHandle handle, StringPtr str);
+
+	long AddCommand(PowershellHandle handle, StringPtr command);
+	long AddArgument(PowershellHandle handle, StringPtr argument);
+	long InvokeCommand(PowershellHandle handle);
+
 #ifdef __cplusplus
 }
 #endif

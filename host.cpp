@@ -92,16 +92,27 @@ long MakeDir(PowershellHandle handle, StringPtr path)
 	powershell->Invoke();
 	return 0;
 }
-
-long startpowershell(RunspaceHandle handle, StringPtr str) {
-    auto managedStr = msclr::interop::marshal_as<System::String^>(str);
-    auto v = PowerShell::Create();
-	v->Runspace = HandleTable::GetRunspace(handle);
-    v->AddCommand("mkdir")->AddArgument(managedStr);
-    v->Invoke();
-    return 0;
-
+long AddCommand(PowershellHandle handle, StringPtr command)
+{
+	auto managedCommand = msclr::interop::marshal_as<System::String^>(command);
+	auto powershell = HandleTable::GetPowershell(handle);
+	powershell->AddCommand(managedCommand);
+	return 0;
 }
+long AddArgument(PowershellHandle handle, StringPtr argument)
+{
+	auto managedArgument = msclr::interop::marshal_as<System::String^>(argument);
+	auto powershell = HandleTable::GetPowershell(handle);
+	powershell->AddArgument(managedArgument);
+	return 0;
+}
+long InvokeCommand(PowershellHandle handle)
+{
+	auto powershell = HandleTable::GetPowershell(handle);
+	powershell->Invoke();
+	return 0;
+}
+
 PowershellHandle CreatePowershell(RunspaceHandle handle)
 {
 	auto powershell = PowerShell::Create();

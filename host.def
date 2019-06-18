@@ -1,7 +1,9 @@
 EXPORTS
-	startpowershell
 	CreateRunspace
 	DeleteRunspace
 	CreatePowershell
 	DeletePowershell
 	MakeDir
+	AddCommand
+	AddArgument
+	InvokeCommand
