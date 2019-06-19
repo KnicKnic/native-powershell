@@ -10,7 +10,7 @@ write-host $debugPreference, $verbosepreference,$informationPreference, $errorac
 function ThrowIt($message){
 	throw $message
 }
-get-proc | write-host
+send-hostcommand "yoyoyo"
 write-error "first error"
 
 Get-Variable * | out-string | write-host

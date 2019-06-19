@@ -176,10 +176,12 @@ void DeletePowershell(PowershellHandle handle)
 /// <summary>
 /// Class that implements the GetProcCommand.
 /// </summary>
-[Cmdlet(VerbsCommon::Get, "Proc")]
-public ref class GetProcCommand : Cmdlet
+[Cmdlet(VerbsCommunications::Send, "HostCommand")]
+public ref class SendHostCommand : Cmdlet
 {
-
+public:
+    [Parameter(Position = 0)]
+    property System::String^ message;
         /// <summary>
         /// For each of the requested process names, retrieve and write
         /// the associated processes.
@@ -187,18 +189,20 @@ public ref class GetProcCommand : Cmdlet
 protected:
     void ProcessRecord()override
     {
-        // Get the current processes.
+        //// Get the current processes.
 
-        array< int >^ processes = gcnew array< int >(3);
-        processes[0] = 5;
-        processes[1] = 6;
-        processes[2] = 7;
+        //array< int >^ processes = gcnew array< int >(3);
+        //processes[0] = 5;
+        //processes[1] = 6;
+        //processes[2] = 7;
 
-        // Write the processes to the pipeline making them available
-        // to the next cmdlet. The second argument (true) tells the
-        // system to enumerate the array, and send one process object
-        // at a time to the pipeline.
-        WriteObject(processes, true);
+        //// Write the processes to the pipeline making them available
+        //// to the next cmdlet. The second argument (true) tells the
+        //// system to enumerate the array, and send one process object
+        //// at a time to the pipeline.
+        //WriteObject(processes, true);
+        MyHost^ host = safe_cast<MyHost^>(this->CommandRuntime->Host->PrivateData->BaseObject);
+        Console::WriteLine(host->Name + message);
     }
 
 } // End GetProcCommand class.
@@ -230,7 +234,7 @@ RunspaceHandle CreateRunspace()
 {
     auto iss = InitialSessionState::CreateDefault();
     // Add the get-proc cmdlet to the InitialSessionState object.
-    auto ssce = gcnew SessionStateCmdletEntry("get-proc", GetProcCommand::typeid, nullptr);
+    auto ssce = gcnew SessionStateCmdletEntry("Send-HostCommand", SendHostCommand::typeid, nullptr);
     iss->Commands->Add(ssce);
 
     // ensure logging enabled

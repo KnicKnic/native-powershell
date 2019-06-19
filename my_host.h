@@ -198,6 +198,13 @@ public:
         System::String^ get() override { return "MySampleConsoleHostImplementation"; }
     }
 
+    System::Management::Automation::PSObject^ powershellThis = gcnew System::Management::Automation::PSObject(this);
+
+    virtual property System::Management::Automation::PSObject^ PrivateData
+    {
+        System::Management::Automation::PSObject^ get()override { return powershellThis;  }
+    };
+
     /// <summary>
     /// Gets an instance of the implementation of the PSHostUserInterface
     /// class for this application. This instance is allocated once at startup time
