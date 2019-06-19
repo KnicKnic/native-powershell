@@ -133,6 +133,15 @@ long InvokeCommand(PowershellHandle handle)
             System::Console::WriteLine(object->GetType()->ToString());
             System::Console::WriteLine(object->BaseObject->GetType()->ToString());
         }
+        // TODO figure out why powershell errors are not displayed in host
+        auto errors = powershell->Streams->Error;
+        if (!(errors == nullptr )&& errors->Count > 0)
+        {
+            for each(auto err in errors)
+            {
+                System::Console::WriteLine("    error: {0}", err->ToString());
+            }
+        }
     }
     catch (System::Management::Automation::RuntimeException^ exception) {
         System::Console::WriteLine("Caught Exception of type " + exception->GetType()->ToString());
@@ -164,9 +173,73 @@ void DeletePowershell(PowershellHandle handle)
 }
 
 
+/// <summary>
+/// Class that implements the GetProcCommand.
+/// </summary>
+[Cmdlet(VerbsCommon::Get, "Proc")]
+public ref class GetProcCommand : Cmdlet
+{
+
+        /// <summary>
+        /// For each of the requested process names, retrieve and write
+        /// the associated processes.
+        /// </summary>
+protected:
+    void ProcessRecord()override
+    {
+        // Get the current processes.
+
+        array< int >^ processes = gcnew array< int >(3);
+        processes[0] = 5;
+        processes[1] = 6;
+        processes[2] = 7;
+
+        // Write the processes to the pipeline making them available
+        // to the next cmdlet. The second argument (true) tells the
+        // system to enumerate the array, and send one process object
+        // at a time to the pipeline.
+        WriteObject(processes, true);
+    }
+
+} // End GetProcCommand class.
+;
+
+
+
+void SetISSEV(
+    System::Management::Automation::Runspaces::InitialSessionStateEntryCollection<System::Management::Automation::Runspaces::SessionStateVariableEntry^>^ entries,
+    System::String^ name,
+    System::Object^ value) 
+{
+  int foundIndex = 0;
+  for each(auto  entry in entries)
+  {
+    if (entry->Name->Equals(name, StringComparison::OrdinalIgnoreCase))
+    {
+      entries->RemoveItem( foundIndex);
+      entries->Add(gcnew SessionStateVariableEntry(entry->Name, value, entry->Description));
+      return;
+    }
+
+    foundIndex++;
+  }
+
+  throw gcnew System::IndexOutOfRangeException;
+}
 RunspaceHandle CreateRunspace()
 {
-	Runspace^ runspace = RunspaceFactory::CreateRunspace(gcnew MyHost());
+    auto iss = InitialSessionState::CreateDefault();
+    // Add the get-proc cmdlet to the InitialSessionState object.
+    auto ssce = gcnew SessionStateCmdletEntry("get-proc", GetProcCommand::typeid, nullptr);
+    iss->Commands->Add(ssce);
+
+    // ensure logging enabled
+    SetISSEV(iss->Variables, "ErrorActionPreference", System::Management::Automation::ActionPreference::Continue);
+    SetISSEV(iss->Variables, "DebugPreference", System::Management::Automation::ActionPreference::Continue);
+    SetISSEV(iss->Variables, "WarningPreference", System::Management::Automation::ActionPreference::Continue);
+    SetISSEV(iss->Variables, "VerbosePreference", System::Management::Automation::ActionPreference::Continue);
+    SetISSEV(iss->Variables, "InformationPreference", System::Management::Automation::ActionPreference::Continue);
+    Runspace^ runspace = RunspaceFactory::CreateRunspace(gcnew MyHost(),iss);
 	runspace->Open();
 	return HandleTable::InsertRunspace(runspace);
 }

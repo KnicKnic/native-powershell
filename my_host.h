@@ -9,7 +9,7 @@ public:
         void set(System::ConsoleColor) override {  };
     }
     virtual property System::Management::Automation::Host::Size BufferSize {
-        System::Management::Automation::Host::Size get() override { throw gcnew System::NotImplementedException(); };
+        System::Management::Automation::Host::Size get() override { return System::Management::Automation::Host::Size(200,1024); };
         void set(System::Management::Automation::Host::Size) override { throw gcnew System::NotImplementedException(); };
     }
     virtual property System::Management::Automation::Host::Coordinates CursorPosition {
