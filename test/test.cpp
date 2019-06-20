@@ -3,8 +3,24 @@
 
 #include <iostream>
 #include "../host.h"
+extern "C" {
+    void Logger(const wchar_t* s)
+    {
+        std::wcout << L"myLogger: " << std::wstring(s) << L'\n';
+    }
+    const wchar_t* Command(const wchar_t* s)
+    {
+        return s;
+    }
+
+    unsigned char* MallocWrapper(unsigned long long size) {
+        return (unsigned char*)malloc(size);
+    }
+}
+
 int main()
 {
+    InitLibrary(Command, MallocWrapper, free, Logger);
     auto runspace = CreateRunspace();
     auto powershell = CreatePowershell(runspace);
     AddScript(powershell, L"c:\\code\\psh_host\\script.ps1");

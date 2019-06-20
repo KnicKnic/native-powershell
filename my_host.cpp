@@ -7,11 +7,12 @@
   using namespace System::Management::Automation;
   using namespace System::Management::Automation::Host;
 #include "my_host.h"
+#include "host_internal.h"
 
 
   inline void MyHostUserInterface::Write(System::String^ value)
   {
-      System::Console::Write(value);
+      Log(value);
   }
 
   /// <summary>
@@ -26,7 +27,7 @@
   inline void MyHostUserInterface::Write(ConsoleColor foregroundColor, ConsoleColor backgroundColor, System::String^ value)
   {
       // Colors are ignored.
-      System::Console::Write(value);
+      Log(value);
   }
 
   /// <summary>
@@ -36,10 +37,7 @@
 
   inline void MyHostUserInterface::WriteDebugLine(System::String^ message)
   {
-      System::Console::WriteLine(System::String::Format(
-          CultureInfo::CurrentCulture,
-          "DEBUG: {0}",
-          message));
+      LogLineDebug(message);
   }
 
   /// <summary>
@@ -47,12 +45,9 @@
   /// </summary>
   /// <param name="value">The error message that is displayed.</param>
 
-  inline void MyHostUserInterface::WriteErrorLine(System::String^ value)
+  inline void MyHostUserInterface::WriteErrorLine(System::String^ message)
   {
-      System::Console::WriteLine(System::String::Format(
-          CultureInfo::CurrentCulture,
-          "ERROR: {0}",
-          value));
+      LogLineError(message);
   }
 
   /// <summary>
@@ -62,7 +57,7 @@
 
   inline void MyHostUserInterface::WriteLine()
   {
-      System::Console::WriteLine();
+      LogLine(L"");
   }
 
   /// <summary>
@@ -71,9 +66,9 @@
   /// </summary>
   /// <param name="value">The line to be written.</param>
 
-  inline void MyHostUserInterface::WriteLine(System::String^ value)
+  inline void MyHostUserInterface::WriteLine(System::String^ message)
   {
-      System::Console::WriteLine(value);
+      LogLine(message);
   }
 
   /// <summary>
@@ -84,10 +79,9 @@
   /// <param name="backgroundColor">The background color of the display. </param>
   /// <param name="value">The line to be written.</param>
 
-  inline void MyHostUserInterface::WriteLine(ConsoleColor foregroundColor, ConsoleColor backgroundColor, System::String^ value)
+  inline void MyHostUserInterface::WriteLine(ConsoleColor foregroundColor, ConsoleColor backgroundColor, System::String^ message)
   {
-      // Write to the output stream, ignore the colors
-      System::Console::WriteLine(value);
+      LogLineDebug(message);
   }
 
   /// <summary>
@@ -107,7 +101,7 @@
 
   inline void MyHostUserInterface::WriteVerboseLine(System::String^ message)
   {
-      System::Console::WriteLine(System::String::Format(CultureInfo::CurrentCulture, "VERBOSE: {0}", message));
+      LogLineVerbose(message);
   }
 
   /// <summary>
@@ -117,7 +111,7 @@
 
   inline void MyHostUserInterface::WriteWarningLine(System::String^ message)
   {
-      System::Console::WriteLine(System::String::Format(CultureInfo::CurrentCulture, "WARNING: {0}", message));
+      LogLineWarning(message);
   }
 
   inline System::String^ MyHostUserInterface::ReadLine()

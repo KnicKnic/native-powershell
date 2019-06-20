@@ -129,10 +129,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="host.cpp" />
+    <ClCompile Include="host_internal.cpp" />
     <ClCompile Include="my_host.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="host.h" />
+    <ClInclude Include="host_internal.h" />
     <ClInclude Include="my_host.h" />
   </ItemGroup>
   <ItemGroup>

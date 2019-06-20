@@ -17,6 +17,37 @@ using namespace System::Globalization;
 using namespace System::Management::Automation;
 using namespace System::Management::Automation::Host;
 #include "my_host.h"
+#include "host_internal.h"
+
+
+// Globals
+ReceiveJsonCommand ReceiveJsonComamndPtr = nullptr;
+FreePointer FreePointerPtr = nullptr;
+AllocPointer AllocPointerPtr = nullptr;
+
+LogString BaseLogString = nullptr;
+LogString LogWarningPtr = nullptr;
+LogString LogInformationPtr = nullptr;
+LogString LogVerbosePtr = nullptr;
+LogString LogDebugPtr = nullptr;
+LogString LogErrorPtr = nullptr;
+
+LogString BaseLogLinePtr = nullptr;
+LogString LogWarningLinePtr = nullptr;
+LogString LogInformationLinePtr = nullptr;
+LogString LogVerboseLinePtr = nullptr;
+LogString LogDebugLinePtr = nullptr;
+LogString LogErrorLinePtr = nullptr;
+
+
+
+
+void InitLibrary(ReceiveJsonCommand receivePtr, AllocPointer allocPtr, FreePointer freePtr, LogString logPtr) {
+    ReceiveJsonComamndPtr = receivePtr;
+    AllocPointerPtr = allocPtr;
+    FreePointerPtr = freePtr;
+    BaseLogString = logPtr;
+}
 
 template<typename T,typename X>
 T MakeHandle(X x) {
@@ -128,10 +159,10 @@ long InvokeCommand(PowershellHandle handle)
         auto results = powershell->Invoke();
         for each (auto object in results) {
 
-            System::Console::WriteLine("Got Object");
-            System::Console::WriteLine(object->ToString());
-            System::Console::WriteLine(object->GetType()->ToString());
-            System::Console::WriteLine(object->BaseObject->GetType()->ToString());
+            LogLine("Got Object");
+            LogLine(object->ToString());
+            LogLine(object->GetType()->ToString());
+            LogLine(object->BaseObject->GetType()->ToString());
         }
         // TODO figure out why powershell errors are not displayed in host
         auto errors = powershell->Streams->Error;
@@ -139,21 +170,21 @@ long InvokeCommand(PowershellHandle handle)
         {
             for each(auto err in errors)
             {
-                System::Console::WriteLine("    error: {0}", err->ToString());
+                LogLineError(err->ToString());
             }
         }
     }
     catch (System::Management::Automation::RuntimeException^ exception) {
-        System::Console::WriteLine("Caught Exception of type " + exception->GetType()->ToString());
-        System::Console::WriteLine(exception->ToString());
+        LogLineError("Caught Exception of type " + exception->GetType()->ToString());
+        LogLineError(exception->ToString());
         if (exception->ErrorRecord) {
-            System::Console::WriteLine("Powershell stack trace");
-            System::Console::WriteLine(exception->ErrorRecord->ScriptStackTrace);
+            LogLineError("Powershell stack trace");
+            LogLineError(exception->ErrorRecord->ScriptStackTrace);
         }
     }
     catch (System::Object^ exception) {
-        System::Console::WriteLine("Caught Exception of type " + exception->GetType()->ToString());
-        System::Console::WriteLine(exception->ToString());
+        LogLineError("Caught Exception of type " + exception->GetType()->ToString());
+        LogLineError(exception->ToString());
 
     }
 	return 0;
@@ -201,8 +232,12 @@ protected:
         //// system to enumerate the array, and send one process object
         //// at a time to the pipeline.
         //WriteObject(processes, true);
+
+        //std::wstring nativeString = msclr::interop::marshal_as<std::wstring>(message);
+        //printf("printf: %ws\n", nativeString.c_str());
+
         MyHost^ host = safe_cast<MyHost^>(this->CommandRuntime->Host->PrivateData->BaseObject);
-        Console::WriteLine(host->Name + message);
+        LogLine(host->Name + message);
     }
 
 } // End GetProcCommand class.

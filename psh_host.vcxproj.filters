@@ -21,6 +21,9 @@
     <ClCompile Include="my_host.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="host_internal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="host.h">
@@ -28,6 +31,9 @@
     </ClInclude>
     <ClInclude Include="my_host.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="host_internal.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
