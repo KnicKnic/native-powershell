@@ -6,7 +6,7 @@
 extern "C" {
     void Logger(const wchar_t* s)
     {
-        std::wcout << L"myLogger: " << std::wstring(s) << L'\n';
+        std::wcout << L"My Member Logger: " << std::wstring(s) << L'\n';
     }
     const wchar_t* Command(const wchar_t* s)
     {
@@ -20,8 +20,8 @@ extern "C" {
 
 int main()
 {
-    InitLibrary(Command, MallocWrapper, free, Logger);
-    auto runspace = CreateRunspace();
+    InitLibrary(Command, MallocWrapper, free);
+    auto runspace = CreateRunspace(Logger);
     auto powershell = CreatePowershell(runspace);
     AddScript(powershell, L"c:\\code\\psh_host\\script.ps1");
     //AddArgument(powershell, L"c:\\ddddddd");

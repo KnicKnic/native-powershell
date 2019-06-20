@@ -8,7 +8,7 @@ extern "C" {
     typedef const wchar_t * (*ReceiveJsonCommand)(const wchar_t*);
     typedef void (*LogString)(const wchar_t*);
 
-    void InitLibrary(ReceiveJsonCommand, AllocPointer, FreePointer, LogString);
+    void InitLibrary(ReceiveJsonCommand, AllocPointer, FreePointer);
 
 	typedef struct RunspaceHandle_ {} *RunspaceHandle;
 	typedef struct PowershellHandle_ {} *PowershellHandle;
@@ -25,7 +25,7 @@ extern "C" {
 	void DeletePowershell(PowershellHandle handle);
 
 
-	RunspaceHandle CreateRunspace();
+	RunspaceHandle CreateRunspace(LogString BaseLogString);
 
 	void DeleteRunspace(RunspaceHandle handle);
 

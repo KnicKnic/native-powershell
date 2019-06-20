@@ -18,35 +18,24 @@ using namespace System::Management::Automation;
 using namespace System::Management::Automation::Host;
 #include "my_host.h"
 #include "host_internal.h"
+#include "runspace.h"
+#include "powershell.h"
 
+#include "logger.h"
 
 // Globals
 ReceiveJsonCommand ReceiveJsonComamndPtr = nullptr;
 FreePointer FreePointerPtr = nullptr;
 AllocPointer AllocPointerPtr = nullptr;
 
-LogString BaseLogString = nullptr;
-LogString LogWarningPtr = nullptr;
-LogString LogInformationPtr = nullptr;
-LogString LogVerbosePtr = nullptr;
-LogString LogDebugPtr = nullptr;
-LogString LogErrorPtr = nullptr;
-
-LogString BaseLogLinePtr = nullptr;
-LogString LogWarningLinePtr = nullptr;
-LogString LogInformationLinePtr = nullptr;
-LogString LogVerboseLinePtr = nullptr;
-LogString LogDebugLinePtr = nullptr;
-LogString LogErrorLinePtr = nullptr;
 
 
 
 
-void InitLibrary(ReceiveJsonCommand receivePtr, AllocPointer allocPtr, FreePointer freePtr, LogString logPtr) {
+void InitLibrary(ReceiveJsonCommand receivePtr, AllocPointer allocPtr, FreePointer freePtr) {
     ReceiveJsonComamndPtr = receivePtr;
     AllocPointerPtr = allocPtr;
     FreePointerPtr = freePtr;
-    BaseLogString = logPtr;
 }
 
 template<typename T,typename X>
@@ -60,29 +49,30 @@ long long GetHandle(T t)
 	return (long long)t;
 }
 
-public ref class HandleTable {
+
+ ref class HandleTable {
 
 public:
-	static System::Collections::Concurrent::ConcurrentDictionary<long long, Runspace^>^ runspaces = gcnew System::Collections::Concurrent::ConcurrentDictionary<long long, Runspace^>();
-	static System::Collections::Concurrent::ConcurrentDictionary<long long, PowerShell^>^ powershells = gcnew System::Collections::Concurrent::ConcurrentDictionary<long long, PowerShell^>();
+	static System::Collections::Concurrent::ConcurrentDictionary<long long, RunspaceHolder^>^ runspaces = gcnew System::Collections::Concurrent::ConcurrentDictionary<long long, RunspaceHolder^>();
+	static System::Collections::Concurrent::ConcurrentDictionary<long long, PowerShellHolder^>^ powershells = gcnew System::Collections::Concurrent::ConcurrentDictionary<long long, PowerShellHolder^>();
 	/*static HandleTable() {
 		runspaces = ;
 	}*/
-	static RunspaceHandle InsertRunspace(Runspace^ runspace) {
+	static RunspaceHandle InsertRunspace(RunspaceHolder^ runspace) {
 		auto index = System::Threading::Interlocked::Increment(runspaceIndex);
 		runspaces[index] = runspace;
 		return MakeHandle<RunspaceHandle>(index);
 	}
-	static Runspace^ GetRunspace(RunspaceHandle handle) {
-		Runspace^ runspace;
+	static RunspaceHolder^ GetRunspace(RunspaceHandle handle) {
+        RunspaceHolder^ runspace;
 		if (!runspaces->TryGetValue(GetHandle(handle), runspace))
 		{
 			throw "Key Not found";
 		}
 		return runspace;
 	}
-	static Runspace^ RemoveRunspace(RunspaceHandle handle) {
-		Runspace^ runspace;
+	static RunspaceHolder^ RemoveRunspace(RunspaceHandle handle) {
+        RunspaceHolder^ runspace;
 		printf("About to remove runspace\n");
 		if (!runspaces->TryRemove(GetHandle(handle), runspace))
 		{
@@ -92,21 +82,21 @@ public:
 		printf("Removed runspace\n");
 		return runspace;
 	}
-	static PowershellHandle InsertPowershell(PowerShell^ powershell) {
+	static PowershellHandle InsertPowershell(PowerShellHolder^ powershell) {
 		auto index = System::Threading::Interlocked::Increment(powershellIndex);
 		powershells[index] = powershell;
 		return MakeHandle<PowershellHandle>(index);
 	}
-	static PowerShell^ GetPowershell(PowershellHandle handle) {
-		PowerShell^ powershell;
+	static PowerShellHolder^ GetPowershell(PowershellHandle handle) {
+        PowerShellHolder^ powershell;
 		if (!powershells->TryGetValue(GetHandle(handle), powershell))
 		{
 			throw "Key Not found";
 		}
 		return powershell;
 	}
-	static PowerShell^ RemovePowershell(PowershellHandle handle) {
-		PowerShell^ powershell;
+	static PowerShellHolder^ RemovePowershell(PowershellHandle handle) {
+        PowerShellHolder^ powershell;
 		printf("About to remove powershell\n");
 		if (!powershells->TryRemove(GetHandle(handle), powershell))
 		{
@@ -125,7 +115,7 @@ private:
 long MakeDir(PowershellHandle handle, StringPtr path)
 {
 	auto managedPath = msclr::interop::marshal_as<System::String^>(path);
-	auto powershell = HandleTable::GetPowershell(handle);
+	auto powershell = HandleTable::GetPowershell(handle)->powershell;
 	powershell->AddCommand("mkdir");
 	powershell->AddArgument(managedPath);
 	powershell->Invoke();
@@ -134,35 +124,38 @@ long MakeDir(PowershellHandle handle, StringPtr path)
 long AddCommand(PowershellHandle handle, StringPtr command)
 {
 	auto managedCommand = msclr::interop::marshal_as<System::String^>(command);
-	auto powershell = HandleTable::GetPowershell(handle);
+	auto powershell = HandleTable::GetPowershell(handle)->powershell;
 	powershell->AddCommand(managedCommand);
 	return 0;
 }
 long AddArgument(PowershellHandle handle, StringPtr argument)
 {
     auto managedArgument = msclr::interop::marshal_as<System::String^>(argument);
-    auto powershell = HandleTable::GetPowershell(handle);
+    auto powershell = HandleTable::GetPowershell(handle)->powershell;
     powershell->AddArgument(managedArgument);
     return 0;
 }
 long AddScript(PowershellHandle handle, StringPtr path, bool useLocalScope)
 {
     auto managedPath = msclr::interop::marshal_as<System::String^>(path);
-    auto powershell = HandleTable::GetPowershell(handle);
+    auto powershellHolder = HandleTable::GetPowershell(handle);
+    auto powershell = powershellHolder->powershell;
     powershell->AddScript(managedPath, useLocalScope);
     return 0;
 }
 long InvokeCommand(PowershellHandle handle)
 {
-	auto powershell = HandleTable::GetPowershell(handle);
+	auto powershellHolder = HandleTable::GetPowershell(handle);
+    auto powershell = powershellHolder->powershell;
+    auto Logger = powershellHolder->runspace->logger;
     try {
         auto results = powershell->Invoke();
         for each (auto object in results) {
 
-            LogLine("Got Object");
-            LogLine(object->ToString());
-            LogLine(object->GetType()->ToString());
-            LogLine(object->BaseObject->GetType()->ToString());
+            Logger->LogLine("Got Object");
+            Logger->LogLine(object->ToString());
+            Logger->LogLine(object->GetType()->ToString());
+            Logger->LogLine(object->BaseObject->GetType()->ToString());
         }
         // TODO figure out why powershell errors are not displayed in host
         auto errors = powershell->Streams->Error;
@@ -170,21 +163,21 @@ long InvokeCommand(PowershellHandle handle)
         {
             for each(auto err in errors)
             {
-                LogLineError(err->ToString());
+                Logger->LogLineError(err->ToString());
             }
         }
     }
     catch (System::Management::Automation::RuntimeException^ exception) {
-        LogLineError("Caught Exception of type " + exception->GetType()->ToString());
-        LogLineError(exception->ToString());
+        Logger->LogLineError("Caught Exception of type " + exception->GetType()->ToString());
+        Logger->LogLineError(exception->ToString());
         if (exception->ErrorRecord) {
-            LogLineError("Powershell stack trace");
-            LogLineError(exception->ErrorRecord->ScriptStackTrace);
+            Logger->LogLineError("Powershell stack trace");
+            Logger->LogLineError(exception->ErrorRecord->ScriptStackTrace);
         }
     }
     catch (System::Object^ exception) {
-        LogLineError("Caught Exception of type " + exception->GetType()->ToString());
-        LogLineError(exception->ToString());
+        Logger->LogLineError("Caught Exception of type " + exception->GetType()->ToString());
+        Logger->LogLineError(exception->ToString());
 
     }
 	return 0;
@@ -192,15 +185,17 @@ long InvokeCommand(PowershellHandle handle)
 
 PowershellHandle CreatePowershell(RunspaceHandle handle)
 {
+    auto runspaceHolder = HandleTable::GetRunspace(handle);
 	auto powershell = PowerShell::Create();
-	powershell->Runspace = HandleTable::GetRunspace(handle);
-	return HandleTable::InsertPowershell(powershell);
+    auto powershellHolder = gcnew PowerShellHolder(runspaceHolder, powershell);
+	powershell->Runspace = runspaceHolder->runspace;
+	return HandleTable::InsertPowershell(powershellHolder);
 }
 
 
 void DeletePowershell(PowershellHandle handle)
 {
-	HandleTable::RemovePowershell(handle)->Stop();
+	HandleTable::RemovePowershell(handle)->powershell->Stop();
 }
 
 
@@ -237,7 +232,7 @@ protected:
         //printf("printf: %ws\n", nativeString.c_str());
 
         MyHost^ host = safe_cast<MyHost^>(this->CommandRuntime->Host->PrivateData->BaseObject);
-        LogLine(host->Name + message);
+        host->GetLogger()->LogLine(host->Name + message);
     }
 
 } // End GetProcCommand class.
@@ -265,7 +260,7 @@ void SetISSEV(
 
   throw gcnew System::IndexOutOfRangeException;
 }
-RunspaceHandle CreateRunspace()
+RunspaceHandle CreateRunspace(LogString BaseLogString)
 {
     auto iss = InitialSessionState::CreateDefault();
     // Add the get-proc cmdlet to the InitialSessionState object.
@@ -278,14 +273,22 @@ RunspaceHandle CreateRunspace()
     SetISSEV(iss->Variables, "WarningPreference", System::Management::Automation::ActionPreference::Continue);
     SetISSEV(iss->Variables, "VerbosePreference", System::Management::Automation::ActionPreference::Continue);
     SetISSEV(iss->Variables, "InformationPreference", System::Management::Automation::ActionPreference::Continue);
-    Runspace^ runspace = RunspaceFactory::CreateRunspace(gcnew MyHost(),iss);
+    
+    // todo the below is not memory safe! need to fix how Logger is stored
+    auto logger = new Logger(BaseLogString);
+    auto holder = gcnew RunspaceHolder(logger);
+    auto host = gcnew MyHost(holder);
+    Runspace^ runspace = RunspaceFactory::CreateRunspace(host,iss);
+    holder->runspace = runspace;
 	runspace->Open();
-	return HandleTable::InsertRunspace(runspace);
+	return HandleTable::InsertRunspace(holder);
 }
 
 
 void DeleteRunspace(RunspaceHandle handle)
 {
-	HandleTable::RemoveRunspace(handle)->Close();
+    auto runspaceHolder = HandleTable::RemoveRunspace(handle);
+	runspaceHolder->runspace->Close();
+    delete runspaceHolder->logger;
 }
 

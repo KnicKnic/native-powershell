@@ -12,7 +12,7 @@
 
   inline void MyHostUserInterface::Write(System::String^ value)
   {
-      Log(value);
+      GetLogger()->Log(value);
   }
 
   /// <summary>
@@ -27,7 +27,7 @@
   inline void MyHostUserInterface::Write(ConsoleColor foregroundColor, ConsoleColor backgroundColor, System::String^ value)
   {
       // Colors are ignored.
-      Log(value);
+      GetLogger()->Log(value);
   }
 
   /// <summary>
@@ -37,7 +37,7 @@
 
   inline void MyHostUserInterface::WriteDebugLine(System::String^ message)
   {
-      LogLineDebug(message);
+      GetLogger()->LogLineDebug(message);
   }
 
   /// <summary>
@@ -47,7 +47,7 @@
 
   inline void MyHostUserInterface::WriteErrorLine(System::String^ message)
   {
-      LogLineError(message);
+      GetLogger()->LogLineError(message);
   }
 
   /// <summary>
@@ -57,7 +57,7 @@
 
   inline void MyHostUserInterface::WriteLine()
   {
-      LogLine(L"");
+      GetLogger()->LogLine(L"");
   }
 
   /// <summary>
@@ -68,7 +68,7 @@
 
   inline void MyHostUserInterface::WriteLine(System::String^ message)
   {
-      LogLine(message);
+      GetLogger()->LogLine(message);
   }
 
   /// <summary>
@@ -81,7 +81,7 @@
 
   inline void MyHostUserInterface::WriteLine(ConsoleColor foregroundColor, ConsoleColor backgroundColor, System::String^ message)
   {
-      LogLineDebug(message);
+      GetLogger()->LogLineDebug(message);
   }
 
   /// <summary>
@@ -101,7 +101,7 @@
 
   inline void MyHostUserInterface::WriteVerboseLine(System::String^ message)
   {
-      LogLineVerbose(message);
+      GetLogger()->LogLineVerbose(message);
   }
 
   /// <summary>
@@ -111,7 +111,7 @@
 
   inline void MyHostUserInterface::WriteWarningLine(System::String^ message)
   {
-      LogLineWarning(message);
+      GetLogger()->LogLineWarning(message);
   }
 
   inline System::String^ MyHostUserInterface::ReadLine()
@@ -149,18 +149,6 @@
       throw gcnew System::NotImplementedException();
   }
 
-  /// <summary>
-  /// Initializes a new instance of the MyHost class. Keep
-  /// a reference to the host application object so that it
-  /// can be informed of when to exit.
-  /// </summary>
-  /// <param name="program">
-  /// A reference to the host application object.
-  /// </param>
-
-  inline MyHost::MyHost()
-  {
-  }
 
   inline void MyHost::SetShouldExit(int exitCode)
   {
@@ -217,4 +205,15 @@
   inline void MyRawUserInterface::ScrollBufferContents(System::Management::Automation::Host::Rectangle source, System::Management::Automation::Host::Coordinates destination, System::Management::Automation::Host::Rectangle clip, System::Management::Automation::Host::BufferCell fill)
   {
       throw gcnew System::NotImplementedException();
+  }
+
+  inline Logger* MyRawUserInterface::GetLogger() {
+      return runspace->logger;
+  }
+  inline Logger* MyHostUserInterface::GetLogger() {
+      return runspace->logger;
+  }
+
+  inline Logger* MyHost::GetLogger() {
+      return runspace->logger;
   }

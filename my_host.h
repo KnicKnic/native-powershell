@@ -1,9 +1,16 @@
 #pragma once
-
+#include "runspace.h"
+#include "logger.h"
 
 ref class MyRawUserInterface : PSHostRawUserInterface {
     // Inherited via PSHostRawUserInterface
+private:
+
+    RunspaceHolder^ runspace;
 public:
+    MyRawUserInterface(RunspaceHolder^ runspaceParam) : runspace(runspaceParam) {};
+    Logger* GetLogger();
+
     virtual property System::ConsoleColor BackgroundColor {
         System::ConsoleColor get() override { return System::ConsoleColor::Black; };
         void set(System::ConsoleColor) override {  };
@@ -62,12 +69,19 @@ public:
 /// </summary>
 ref class MyHostUserInterface : PSHostUserInterface
 {
+private:
+    RunspaceHolder^ runspace;
+public:
     /// <summary>
     /// Writes characters to the output display of the host.
     /// </summary>
     /// <param name="value">The characters to be written.</param>
-public:
     virtual void Write(System::String^ value)override;
+
+    MyHostUserInterface(RunspaceHolder^ runspaceParam) : runspace(runspaceParam) {
+        myRawUserInterface = gcnew MyRawUserInterface(runspaceParam);
+    }
+    Logger* GetLogger();
 
     /// <summary>
     /// Writes characters to the output display of the host and specifies the
@@ -136,7 +150,7 @@ public:
     virtual void WriteWarningLine(System::String^ message)override;
 
 private:
-    MyRawUserInterface^ myRawUserInterface = gcnew MyRawUserInterface();
+    MyRawUserInterface^ myRawUserInterface;
 public:
     // Inherited via PSHostUserInterface
     virtual property System::Management::Automation::Host::PSHostRawUserInterface^ RawUI {
@@ -163,7 +177,7 @@ private:
     CultureInfo^ originalCultureInfo =
         System::Threading::Thread::CurrentThread->CurrentCulture;
 
-    MyHostUserInterface^ myHostUserInterface = gcnew MyHostUserInterface();
+    MyHostUserInterface^ myHostUserInterface;
     /// <summary>
     /// The UI culture information of the thread that created
     /// this object.
@@ -177,7 +191,7 @@ private:
     Guid myId = Guid::NewGuid();
 
 public:
-
+    RunspaceHolder^ runspace;
     /// <summary>
     /// Initializes a new instance of the MyHost class. Keep
     /// a reference to the host application object so that it
@@ -186,7 +200,11 @@ public:
     /// <param name="program">
     /// A reference to the host application object.
     /// </param>
-    MyHost();
+    MyHost(RunspaceHolder^ holder) : runspace(holder) {
+        myHostUserInterface = gcnew MyHostUserInterface(holder);
+    };
+
+    Logger* GetLogger();
 
     /// <summary>
     /// Gets a string that contains the name of this host implementation.
