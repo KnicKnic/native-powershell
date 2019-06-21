@@ -128,6 +128,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="handle_table.cpp" />
     <ClCompile Include="host.cpp" />
     <ClCompile Include="host_internal.cpp" />
     <ClCompile Include="logger.cpp" />
@@ -136,6 +137,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AutoPtr.h" />
+    <ClInclude Include="handle_table.h" />
     <ClInclude Include="host.h" />
     <ClInclude Include="host_internal.h" />
     <ClInclude Include="logger.h" />

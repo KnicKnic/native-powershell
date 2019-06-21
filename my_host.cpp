@@ -207,13 +207,13 @@
       throw gcnew System::NotImplementedException();
   }
 
-  inline Logger* MyRawUserInterface::GetLogger() {
+  inline Logger^ MyRawUserInterface::GetLogger() {
       return runspace->logger;
   }
-  inline Logger* MyHostUserInterface::GetLogger() {
+  inline Logger^ MyHostUserInterface::GetLogger() {
       return runspace->logger;
   }
 
-  inline Logger* MyHost::GetLogger() {
+  inline Logger^ MyHost::GetLogger() {
       return runspace->logger;
   }

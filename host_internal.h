@@ -5,51 +5,102 @@
 #include <windows.h>
 
 #include "host.h"
+#include "logger.h"
 #include <string>
-extern ReceiveJsonCommand ReceiveJsonComamndPtr;
+#include <gcroot.h>
 extern FreePointer FreePointerPtr;
 extern AllocPointer AllocPointerPtr;
-//
-//extern LogString BaseLogString;
-//extern LogString LogWarningPtr;
-//extern LogString LogInformationPtr;
-//extern LogString LogVerbosePtr;
-//extern LogString LogDebugPtr;
-//extern LogString LogErrorPtr;
-//
-//extern LogString BaseLogLinePtr;
-//extern LogString LogWarningLinePtr;
-//extern LogString LogInformationLinePtr;
-//extern LogString LogVerboseLinePtr;
-//extern LogString LogDebugLinePtr;
-//extern LogString LogErrorLinePtr;
-//
-//void LogWarning(const std::wstring& log);
-//void LogInformation(const std::wstring& log);
-//void LogVerbose(const std::wstring& log);
-//void LogDebug(const std::wstring& log);
-//void LogError(const std::wstring& log);
-//void Log(const std::wstring& log);
-//
-//void LogLineWarning(const std::wstring& log);
-//void LogLineInformation(const std::wstring& log);
-//void LogLineVerbose(const std::wstring& log);
-//void LogLineDebug(const std::wstring& log);
-//void LogLineError(const std::wstring& log);
-//void LogLine(const std::wstring& log);
-//
-//
-//void LogWarning(System::String^ log);
-//void LogInformation(System::String^ log);
-//void LogVerbose(System::String^ log);
-//void LogDebug(System::String^ log);
-//void LogError(System::String^ log);
-//void Log(System::String^ log);
-//
-//void LogLineWarning(System::String^ log);
-//void LogLineInformation(System::String^ log);
-//void LogLineVerbose(System::String^ log);
-//void LogLineDebug(System::String^ log);
-//void LogLineError(System::String^ log);
-//void LogLine(System::String^ log);
 
+struct FreePointerHelper {
+    template<typename T>
+    void operator()(T* t) {
+        FreePointerPtr((void*)t);
+    }
+};
+
+template<typename T>
+struct AutoDllFree {
+    T * t;
+    AutoDllFree(const AutoDllFree& obj) = delete;
+    AutoDllFree(T * tParam) :t(tParam) {}
+    AutoDllFree() :t(nullptr) {}
+    AutoDllFree(AutoDllFree&& rhs)
+    {
+        t = rhs.t;
+        rhs.t = nullptr;
+    }
+    AutoDllFree& operator=(AutoDllFree&& p)
+    {
+        t = rhs.t;
+        rhs.t = nullptr;
+    }
+    AutoDllFree& operator=(AutoDllFree& obj) = delete;
+    void free() {
+
+        if (t!=nullptr) {
+            FreePointerPtr((void*)t);
+            t = nullptr;
+        }
+
+    }
+    T* operator->() {
+        return t;
+    }
+    operator T* () {
+        return t;
+    }
+    T* get() {
+        return t;
+    }
+    ~AutoDllFree()
+    {
+        free();
+    }
+};
+
+
+template<typename T>
+AutoDllFree<T> MakeAutoDllFree(T* t) {
+    return AutoDllFree<T>(t);
+}
+
+template<typename T>
+struct AutoDispose {
+    gcroot<T> t;
+    bool freed = false;
+    AutoDispose(const AutoDispose& obj) = delete;
+    AutoDispose(T tParam) :t(tParam) {}
+    AutoDispose() :freed(true) {}
+    AutoDispose(AutoDispose&& rhs)
+    {
+        t = rhs.t;
+        rhs.freed = true;
+    }
+    AutoDispose& operator=(AutoDispose&& p)
+    {
+        t = rhs.t;
+        rhs.freed = true;
+    }
+    AutoDispose& operator=(AutoDispose& obj) = delete;
+    void free() {
+
+        if (!freed) {
+            T toDelete = t;
+            delete toDelete;
+            freed = true;
+        }
+
+    }
+    T operator->() {
+        return t;
+    }
+    ~AutoDispose()
+    {
+        free();
+    }
+};
+
+template<typename T>
+AutoDispose<T> MakeUsing(T t) {
+    return AutoDispose<T>(t);
+}

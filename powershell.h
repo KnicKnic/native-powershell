@@ -12,5 +12,7 @@ public:
     PowerShell^ powershell;
     RunspaceHolder^ runspace;
     PowerShellHolder(RunspaceHolder^ runspaceHolder, PowerShell^ powershellParam) : runspace(runspaceHolder), powershell(powershellParam) {}
-
+    ~PowerShellHolder() {
+        delete powershell;
+    }
 };

@@ -9,7 +9,7 @@ private:
     RunspaceHolder^ runspace;
 public:
     MyRawUserInterface(RunspaceHolder^ runspaceParam) : runspace(runspaceParam) {};
-    Logger* GetLogger();
+    Logger^ GetLogger();
 
     virtual property System::ConsoleColor BackgroundColor {
         System::ConsoleColor get() override { return System::ConsoleColor::Black; };
@@ -81,7 +81,7 @@ public:
     MyHostUserInterface(RunspaceHolder^ runspaceParam) : runspace(runspaceParam) {
         myRawUserInterface = gcnew MyRawUserInterface(runspaceParam);
     }
-    Logger* GetLogger();
+    Logger^ GetLogger();
 
     /// <summary>
     /// Writes characters to the output display of the host and specifies the
@@ -204,7 +204,7 @@ public:
         myHostUserInterface = gcnew MyHostUserInterface(holder);
     };
 
-    Logger* GetLogger();
+    Logger^ GetLogger();
 
     /// <summary>
     /// Gets a string that contains the name of this host implementation.

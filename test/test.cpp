@@ -2,7 +2,21 @@
 //
 
 #include <iostream>
+#include <algorithm>
 #include "../host.h"
+const wchar_t* MallocCopy(const wchar_t* str)
+{
+    if (str == nullptr)
+        return nullptr;
+
+    size_t s = 0;
+    for (; str[s] != '\0'; ++s) {
+    }
+    ++s;
+    auto dest = (wchar_t*)malloc(s * sizeof(str[0]));
+    std::copy(str, str + s, dest);
+    return (const wchar_t*)dest;
+}
 extern "C" {
     void Logger(const wchar_t* s)
     {
@@ -10,7 +24,8 @@ extern "C" {
     }
     const wchar_t* Command(const wchar_t* s)
     {
-        return s;
+        std::wcout << L"Send command got: " << std::wstring(s) << L'\n';
+        return MallocCopy(s);
     }
 
     unsigned char* MallocWrapper(unsigned long long size) {
@@ -20,8 +35,8 @@ extern "C" {
 
 int main()
 {
-    InitLibrary(Command, MallocWrapper, free);
-    auto runspace = CreateRunspace(Logger);
+    InitLibrary(MallocWrapper, free);
+    auto runspace = CreateRunspace(Command, Logger);
     auto powershell = CreatePowershell(runspace);
     AddScript(powershell, L"c:\\code\\psh_host\\script.ps1");
     //AddArgument(powershell, L"c:\\ddddddd");

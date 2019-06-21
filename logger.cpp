@@ -4,10 +4,10 @@
 #include "logger.h"
 
 
-void Logger::LogWrapperAddNewLine(LogString writeLine, void (Logger::*write)(const std::wstring&), const std::wstring& log) {
+void Logger::LogWrapperAddNewLine(LogString writeLine, Logger::WriteLoggerDelegate^ write, const std::wstring& log) {
     if (writeLine == nullptr) {
         std::wstring message = log + L'\n';
-        (this->*write)(message);
+        write(message);
     }
     else {
         writeLine(log.c_str());
@@ -49,24 +49,25 @@ void Logger::Log(const std::wstring & log) {
 
 
 
-void Logger::LogLineWarning(const std::wstring & log) {
-    LogWrapperAddNewLine(LogWarningPtr, &Logger::LogWarning, log);
+void Logger::LogLineWarning(const std::wstring& log) {
+    LogWrapperAddNewLine(LogWarningPtr, LogWarningDelegate, log);
 }
-void Logger::LogLineInformation(const std::wstring & log) {
-    LogWrapperAddNewLine(LogInformationPtr, &Logger::LogInformation, log);
+void Logger::LogLineInformation(const std::wstring& log) {
+    LogWrapperAddNewLine(LogInformationPtr, LogInformationDelegate, log);
 }
-void Logger::LogLineVerbose(const std::wstring & log) {
-    LogWrapperAddNewLine(LogVerbosePtr, &Logger::LogVerbose, log);
+void Logger::LogLineVerbose(const std::wstring& log) {
+    LogWrapperAddNewLine(LogVerbosePtr, LogVerboseDelegate, log);
 }
-void Logger::LogLineDebug(const std::wstring & log) {
-    LogWrapperAddNewLine(LogDebugPtr, &Logger::LogDebug, log);
+void Logger::LogLineDebug(const std::wstring& log) {
+    LogWrapperAddNewLine(LogDebugPtr, LogDebugDelegate, log);
 }
-void Logger::LogLineError(const std::wstring & log) {
-    LogWrapperAddNewLine(LogErrorPtr, &Logger::LogError, log);
+void Logger::LogLineError(const std::wstring& log) {
+    LogWrapperAddNewLine(LogErrorPtr, LogErrorDelegate, log);
 }
-void Logger::LogLine(const std::wstring & log) {
-    LogWrapperAddNewLine(BaseLogString, &Logger::Log, log);
+void Logger::LogLine(const std::wstring& log) {
+    LogWrapperAddNewLine(BaseLogString, LogDelegate, log);
 }
+
 
 
 

@@ -4,10 +4,16 @@
 #include <windows.h>
 #include "host.h"
 #include <string>
-class Logger;
-class Logger {
+ref class Logger {
 public:
-    Logger(LogString WriteFunc) : BaseLogString(WriteFunc) {};
+    Logger(LogString WriteFunc) : BaseLogString(WriteFunc) {
+        LogWarningDelegate = gcnew WriteLoggerDelegate(this, &Logger::LogWarning);
+        LogInformationDelegate = gcnew WriteLoggerDelegate(this, &Logger::LogInformation);
+        LogVerboseDelegate = gcnew WriteLoggerDelegate(this, &Logger::LogVerbose);
+        LogDebugDelegate = gcnew WriteLoggerDelegate(this, &Logger::LogDebug);
+        LogErrorDelegate = gcnew WriteLoggerDelegate(this, &Logger::LogError);
+        LogDelegate = gcnew WriteLoggerDelegate(this, &Logger::Log);
+    };
     LogString BaseLogString = nullptr;
     LogString LogWarningPtr = nullptr;
     LogString LogInformationPtr = nullptr;
@@ -51,8 +57,16 @@ public:
     void LogLineError(System::String^ log);
     void LogLine(System::String^ log);
 private:
+    delegate void WriteLoggerDelegate(const std::wstring&);
 
-    void LogWrapperAddNewLine(LogString writeLine, void(Logger::* write)(const std::wstring&), const std::wstring& log);
+    WriteLoggerDelegate^ LogWarningDelegate;
+    WriteLoggerDelegate^ LogInformationDelegate;
+    WriteLoggerDelegate^ LogVerboseDelegate;
+    WriteLoggerDelegate^ LogDebugDelegate;
+    WriteLoggerDelegate^ LogErrorDelegate;
+    WriteLoggerDelegate^ LogDelegate;
+
+    void LogWrapperAddNewLine(LogString writeLine, WriteLoggerDelegate^ write, const std::wstring& log);
     //__inline void LogWrapperAddNewLine(LogString writeLine, void (Logger::* write)(const std::wstring&), const std::wstring& log) {
     //    if (writeLine == nullptr) {
     //        std::wstring message = log + L'\n';
