@@ -8,3 +8,5 @@ EXPORTS
 	InvokeCommand
 	AddScript
 	InitLibrary
+	AddScriptSpecifyScope
+	AddCommandSpecifyScope

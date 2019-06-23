@@ -12,9 +12,10 @@ public:
     Runspace^ runspace;
     ReceiveJsonCommand sendJsonCommand;
     Logger^ logger;
-    RunspaceHolder(ReceiveJsonCommand jsonCommand, Logger^ loggerParam) : sendJsonCommand(jsonCommand), logger(loggerParam){}
-    ~RunspaceHolder() { 
-        delete runspace;
-        delete logger;
-    }
+    MyHost^ host;
+    RunspaceHolder(ReceiveJsonCommand jsonCommand, Logger^ loggerParam)  
+        : sendJsonCommand(jsonCommand)
+        , logger(loggerParam)
+    {}
+    ~RunspaceHolder();
 };

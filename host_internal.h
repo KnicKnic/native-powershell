@@ -8,6 +8,10 @@
 #include "logger.h"
 #include <string>
 #include <gcroot.h>
+
+ref class RunspaceHolder;
+ref class MyHost;
+
 extern FreePointer FreePointerPtr;
 extern AllocPointer AllocPointerPtr;
 

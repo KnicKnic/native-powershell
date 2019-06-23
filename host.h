@@ -29,10 +29,12 @@ extern "C" {
 	void DeleteRunspace(RunspaceHandle handle);
 
 
-	long AddCommand(PowershellHandle handle, StringPtr command);
+    long AddCommand(PowershellHandle handle, StringPtr command);
+    long AddCommandSpecifyScope(PowershellHandle handle, StringPtr command, char useLocalScope);
 	long AddArgument(PowershellHandle handle, StringPtr argument);
 	long InvokeCommand(PowershellHandle handle);
-    long AddScript(PowershellHandle handle, StringPtr path, bool useLocalScope = false);
+    long AddScript(PowershellHandle handle, StringPtr path);
+    long AddScriptSpecifyScope(PowershellHandle handle, StringPtr path, char useLocalScope);
 
 #ifdef __cplusplus
 }

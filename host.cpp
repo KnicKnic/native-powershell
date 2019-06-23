@@ -37,12 +37,16 @@ void InitLibrary(AllocPointer allocPtr, FreePointer freePtr) {
 }
 
 
+long AddCommandSpecifyScope(PowershellHandle handle, StringPtr command,char useLocalScope)
+{
+    auto managedCommand = msclr::interop::marshal_as<System::String^>(command);
+    auto powershell = HandleTable::GetPowershell(handle)->powershell;
+    powershell->AddCommand(managedCommand, useLocalScope !=0);
+    return 0;
+}
 long AddCommand(PowershellHandle handle, StringPtr command)
 {
-	auto managedCommand = msclr::interop::marshal_as<System::String^>(command);
-	auto powershell = HandleTable::GetPowershell(handle)->powershell;
-	powershell->AddCommand(managedCommand);
-	return 0;
+    return AddCommandSpecifyScope(handle, command, (char)1);
 }
 long AddArgument(PowershellHandle handle, StringPtr argument)
 {
@@ -51,12 +55,15 @@ long AddArgument(PowershellHandle handle, StringPtr argument)
     powershell->AddArgument(managedArgument);
     return 0;
 }
-long AddScript(PowershellHandle handle, StringPtr path, bool useLocalScope)
+long AddScript(PowershellHandle handle, StringPtr path) {
+    return AddScriptSpecifyScope(handle, path, (char)1);
+}
+long AddScriptSpecifyScope(PowershellHandle handle, StringPtr path, char useLocalScope) 
 {
     auto managedPath = msclr::interop::marshal_as<System::String^>(path);
     auto powershellHolder = HandleTable::GetPowershell(handle);
     auto powershell = powershellHolder->powershell;
-    powershell->AddScript(managedPath, useLocalScope);
+    powershell->AddScript(managedPath, useLocalScope!=0);
     return 0;
 }
 long InvokeCommand(PowershellHandle handle)
@@ -65,6 +72,10 @@ long InvokeCommand(PowershellHandle handle)
     auto powershell = powershellHolder->powershell;
     auto Logger = powershellHolder->runspace->logger;
     try {
+        //auto invocationSettings = gcnew PSInvocationSettings();
+        //invocationSettings->ErrorActionPreference = System::Management::Automation::ActionPreference::Continue;
+        //invocationSettings->Host = powershellHolder->runspace->host;
+        //auto results = powershell->Invoke(nullptr, invocationSettings);
         auto results = powershell->Invoke();
         for each (auto object in results) {
 
@@ -199,11 +210,13 @@ RunspaceHandle CreateRunspace(ReceiveJsonCommand receiveJsonCommand, LogString B
     SetISSEV(iss->Variables, "WarningPreference", System::Management::Automation::ActionPreference::Continue);
     SetISSEV(iss->Variables, "VerbosePreference", System::Management::Automation::ActionPreference::Continue);
     SetISSEV(iss->Variables, "InformationPreference", System::Management::Automation::ActionPreference::Continue);
+
     
     auto logger = gcnew Logger(BaseLogString);
     auto holder = gcnew RunspaceHolder(receiveJsonCommand, logger);
     auto host = gcnew MyHost(holder);
     Runspace^ runspace = RunspaceFactory::CreateRunspace(host,iss);
+    holder->host = host;
     holder->runspace = runspace;
 	runspace->Open();
 	return HandleTable::InsertRunspace(holder);
