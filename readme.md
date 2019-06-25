@@ -1,3 +1,4 @@
+[![Build Status](https://dev.azure.com/oneeyedelf1/powershell.native/_apis/build/status/KnicKnic.native-powershell?branchName=master)](https://dev.azure.com/oneeyedelf1/powershell.native/_build/latest?definitionId=2&branchName=master)
 # This repository is under heavy development come back in 2 or three weeks!
 You could watch the repository in the mean time. I will create a release when I am done
 
