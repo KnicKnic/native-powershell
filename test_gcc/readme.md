@@ -4,8 +4,9 @@ install choco
     1. install mingw
     1. install cmake
 
-cmake -G "MinGW Makefiles" .
-mingw32-make.exe
+mkdir build
+cmake -G "MinGW Makefiles" . -b build
+cmake --build build
 
 
 # other things I tried that were not the answers I wanted, but may be useful in the future
