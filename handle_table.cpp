@@ -28,3 +28,15 @@ inline PowerShellHolder^ HandleTable::GetPowershell(PowershellHandle handle) {
 inline PowerShellHolder^ HandleTable::RemovePowershell(PowershellHandle handle) {
     return powershells->remove(handle);
 }
+
+
+
+inline PowerShellObject HandleTable::InsertPSObject(System::Object^ object) {
+    return psObjects->insert(object);
+}
+inline System::Object^ HandleTable::GetPSObject(PowerShellObject handle) {
+    return psObjects->get(handle);
+}
+inline System::Object^ HandleTable::RemovePSObject(PowerShellObject handle) {
+    return psObjects->get(handle);
+}

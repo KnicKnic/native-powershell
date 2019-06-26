@@ -33,6 +33,37 @@ extern "C" {
     }
 }
 
+class Invoker {
+public:
+    Invoker(PowershellHandle handle) {
+        exception = InvokeCommand(handle, &objects, &objectCount);
+    }
+    ~Invoker() {
+        for (unsigned int i = 0; i < objectCount; ++i) {
+            ClosePowerShellObject(objects[i]);
+        }
+        if (objects != nullptr) {
+            free(objects);
+            objectCount = 0;
+        }
+        ClosePowerShellObject(exception);
+    }
+    bool CallFailed() const {
+        return exception != nullptr;
+    }
+    unsigned int Count()const {
+        return objectCount;
+    }
+    PowerShellObject operator[](unsigned int i) {
+        return objects[i];
+    }
+private:
+    PowerShellObject* objects = nullptr;
+    unsigned int objectCount = 0;
+    PowerShellObject exception = nullptr;
+};
+
+
 int main()
 {
     InitLibrary(MallocWrapper, free);
@@ -43,7 +74,9 @@ int main()
     AddCommandSpecifyScope(powershell, L"c:\\code\\go-net\\t3.ps1", 0);
     //AddScriptSpecifyScope(powershell, L"$a = \"asdf\"", 0);
     //AddArgument(powershell, L"c:\\ddddddd");
-    InvokeCommand(powershell);
+    {
+        Invoker invoke(powershell);
+    }
     DeletePowershell(powershell);
 
     powershell = CreatePowershell(runspace);
@@ -53,7 +86,9 @@ int main()
 
     //AddCommand(powershell, L"c:\\code\\go-net\\t3.ps1");
     //AddArgument(powershell, L"c:\\ddddddd");
-    InvokeCommand(powershell);
+    {
+        Invoker invoke(powershell);
+    }
     DeletePowershell(powershell);
 
     DeleteRunspace(runspace);

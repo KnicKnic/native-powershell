@@ -28,7 +28,7 @@ using namespace System::Management::Automation::Host;
 FreePointer FreePointerPtr = nullptr;
 AllocPointer AllocPointerPtr = nullptr;
 
-
+const PowerShellObject EmptyPowerShellObjectHandle = (PowerShellObject)(0);
 
 
 void InitLibrary(AllocPointer allocPtr, FreePointer freePtr) {
@@ -66,48 +66,56 @@ long AddScriptSpecifyScope(PowershellHandle handle, StringPtr path, char useLoca
     powershell->AddScript(managedPath, useLocalScope!=0);
     return 0;
 }
-long InvokeCommand(PowershellHandle handle)
+PowerShellObject InvokeCommand(PowershellHandle handle, PowerShellObject **objects, unsigned int * objectCount )
 {
 	auto powershellHolder = HandleTable::GetPowershell(handle);
     auto powershell = powershellHolder->powershell;
+    auto runspaceHolder = powershellHolder->runspace;
     auto Logger = powershellHolder->runspace->logger;
+    *objectCount = 0;
+    *objects = nullptr;
+    System::Collections::ObjectModel::Collection<System::Management::Automation::PSObject^>^ results;
     try {
         //auto invocationSettings = gcnew PSInvocationSettings();
         //invocationSettings->ErrorActionPreference = System::Management::Automation::ActionPreference::Continue;
         //invocationSettings->Host = powershellHolder->runspace->host;
         //auto results = powershell->Invoke(nullptr, invocationSettings);
-        auto results = powershell->Invoke();
-        for each (auto object in results) {
-
-            Logger->LogLine("Got Object");
-            Logger->LogLine(object->ToString());
-            Logger->LogLine(object->GetType()->ToString());
-            Logger->LogLine(object->BaseObject->GetType()->ToString());
-        }
-        // TODO figure out why powershell errors are not displayed in host
-        auto errors = powershell->Streams->Error;
-        if (!(errors == nullptr )&& errors->Count > 0)
-        {
-            for each(auto err in errors)
-            {
-                Logger->LogLineError(err->ToString());
-            }
-        }
+        results = powershell->Invoke();
     }
-    catch (System::Management::Automation::RuntimeException^ exception) {
-        Logger->LogLineError("Caught Exception of type " + exception->GetType()->ToString());
-        Logger->LogLineError(exception->ToString());
-        if (exception->ErrorRecord) {
-            Logger->LogLineError("Powershell stack trace");
-            Logger->LogLineError(exception->ErrorRecord->ScriptStackTrace);
-        }
-    }
+    //catch (System::Management::Automation::RuntimeException^ exception) {
+    //    Logger->LogLineError("Caught Exception of type " + exception->GetType()->ToString());
+    //    Logger->LogLineError(exception->ToString());
+    //    if (exception->ErrorRecord) {
+    //        Logger->LogLineError("Powershell stack trace");
+    //        Logger->LogLineError(exception->ErrorRecord->ScriptStackTrace);
+    //    }
+    //}
     catch (System::Object^ exception) {
-        Logger->LogLineError("Caught Exception of type " + exception->GetType()->ToString());
-        Logger->LogLineError(exception->ToString());
-
+        return HandleTable::InsertPSObject(gcnew PSObject(exception));
     }
-	return 0;
+    *objectCount = (unsigned int)results->Count;
+    *objects = (PowerShellObject*) AllocPointerPtr(results->Count * sizeof(PowerShellObject));
+    long long i = 0;
+    for each (auto object in results) {
+        (*objects)[i] = HandleTable::InsertPSObject(object);
+        ++i;
+    }
+    // TODO figure out why powershell errors are not displayed in host
+    auto errors = powershell->Streams->Error;
+    if (!(errors == nullptr )&& errors->Count > 0)
+    {
+        for each(auto err in errors)
+        {
+            Logger->LogLineError(err->ToString());
+        }
+    }
+    return EmptyPowerShellObjectHandle;
+}
+
+void ClosePowerShellObject(PowerShellObject psobject) {
+    if (psobject != EmptyPowerShellObjectHandle) {
+        HandleTable::RemovePSObject(psobject);
+    }
 }
 
 PowershellHandle CreatePowershell(RunspaceHandle handle)

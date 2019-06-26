@@ -144,6 +144,7 @@
     <ClInclude Include="my_host.h" />
     <ClInclude Include="powershell.h" />
     <ClInclude Include="runspace.h" />
+    <ClInclude Include="typed_handles.h" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Management.Automation">

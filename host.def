@@ -10,3 +10,4 @@ EXPORTS
 	InitLibrary
 	AddScriptSpecifyScope
 	AddCommandSpecifyScope
+ClosePowerShellObject

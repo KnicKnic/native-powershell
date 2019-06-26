@@ -59,6 +59,9 @@
     <ClInclude Include="handle_table.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="typed_handles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="host.def">
