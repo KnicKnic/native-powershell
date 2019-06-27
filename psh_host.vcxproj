@@ -147,6 +147,7 @@
     <ClInclude Include="typed_handles.h" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="System.Core" />
     <Reference Include="System.Management.Automation">
       <HintPath>..\..\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0\System.Management.Automation.dll</HintPath>
     </Reference>

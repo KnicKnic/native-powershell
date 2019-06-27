@@ -4,6 +4,9 @@
 #include <iostream>
 #include <algorithm>
 #include "../host.h"
+
+using namespace std;
+
 const wchar_t* MallocCopy(const wchar_t* str)
 {
     if (str == nullptr)
@@ -32,6 +35,11 @@ extern "C" {
         return (unsigned char*)malloc(size);
     }
 }
+
+    template<typename T>
+    void FreeFunction(T* ptr) {
+        free((void *)ptr);
+    }
 
 template<typename T>
 class ZeroResetable {
@@ -106,6 +114,26 @@ public:
 private:
 };
 
+std::wstring CopyAndFree(const wchar_t * cStr) {
+    if (cStr == nullptr) {
+        throw std::exception(__FUNCTION__  " got nullptr");
+    }
+    wstring toRet(cStr);
+    FreeFunction(cStr);
+    return toRet;
+}
+
+std::wstring GetType(PowerShellObject handle) {
+    if('\0' == IsPSObjectNullptr(handle))
+        return CopyAndFree(GetPSObjectType(handle));
+    return L"nullptr";
+}
+std::wstring GetToString(PowerShellObject handle) {
+    if ('\0' == IsPSObjectNullptr(handle))
+        return CopyAndFree(GetPSObjectToString(handle));
+    return L"nullptr";
+
+}
 
 int main()
 {
@@ -115,7 +143,7 @@ int main()
     //AddScriptSpecifyScope(powershell, L"c:\\code\\psh_host\\script.ps1", 1);
     //AddCommand(powershell, L"c:\\code\\go-net\\t3.ps1");
     //AddScriptSpecifyScope(powershell, L"write-host $pwd", 0);
-    AddScriptSpecifyScope(powershell, L"dir c:\\", 1);
+    AddScriptSpecifyScope(powershell, L"0;1;$null;dir c:\\", 1);
 
 	//AddCommandSpecifyScope(powershell, L"..\\..\\go-net\\t3.ps1", 0);
     //AddScriptSpecifyScope(powershell, L"$a = \"asdf\"", 0);
@@ -123,6 +151,10 @@ int main()
     {
         Invoker invoke(powershell);
 
+        wcout << L"examining returned objects\n";
+        for (unsigned int i = 0; i < invoke.count; ++i) {
+            wcout << L"Got type: " << GetType(invoke[i]) << L"with value: " << GetToString(invoke[i]) << L'\n';
+        }
 
 		auto powershell2 = CreatePowershell(runspace);
 

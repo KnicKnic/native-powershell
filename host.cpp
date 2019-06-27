@@ -59,7 +59,13 @@ long AddPSObjectArgument(PowershellHandle handle, PowerShellObject object)
 {
 	PSObject^ psObject = HandleTable::GetPSObject(object);
 	auto powershell = HandleTable::GetPowershell(handle)->powershell;
-	powershell->AddArgument(psObject->BaseObject);
+    if (psObject == nullptr)
+    {
+        powershell->AddArgument(psObject);
+    }
+    else {
+        powershell->AddArgument(psObject->BaseObject);
+    }
 	return 0;
 }
 long AddPSObjectArguments(PowershellHandle handle, PowerShellObject* objects, unsigned int count)
@@ -249,5 +255,31 @@ RunspaceHandle CreateRunspace(ReceiveJsonCommand receiveJsonCommand, LogString B
 void DeleteRunspace(RunspaceHandle handle)
 {
     MakeUsing(HandleTable::RemoveRunspace(handle))->runspace->Close();
+}
+
+LPCWSTR MakeHostString(System::String^ str) {
+    std::wstring cppStr = msclr::interop::marshal_as<std::wstring>(str);
+    LPWSTR cStr = (LPWSTR)AllocPointerPtr((cppStr.length() + 1) * 2);
+    std::copy(cppStr.c_str(), cppStr.c_str() + (cppStr.length() + 1),cStr);
+    return cStr;
+}
+
+StringPtr GetPSObjectType(PowerShellObject handle) {
+    auto psObject = HandleTable::GetPSObject(handle);
+    return MakeHostString(psObject->BaseObject->GetType()->ToString());
+}
+StringPtr GetPSObjectToString(PowerShellObject handle) {
+    auto psObject = HandleTable::GetPSObject(handle);
+    return MakeHostString(psObject->BaseObject->ToString());
+}
+char IsPSObjectNullptr(PowerShellObject handle) {
+    PSObject^ psObject = HandleTable::GetPSObject(handle);
+    if (psObject == nullptr) {
+        return (char)(1);
+    }
+    if (psObject->BaseObject == nullptr) {
+        return (char)(1);
+    }
+    return (char)(0);
 }
 

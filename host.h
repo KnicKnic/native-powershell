@@ -43,6 +43,10 @@ extern "C" {
     long AddScriptSpecifyScope(PowershellHandle handle, StringPtr path, char useLocalScope);
     void ClosePowerShellObject(PowerShellObject psobject);
 
+    StringPtr GetPSObjectType(PowerShellObject handle);
+    StringPtr GetPSObjectToString(PowerShellObject handle);
+    char IsPSObjectNullptr(PowerShellObject handle);
+
 #ifdef __cplusplus
 }
 #endif

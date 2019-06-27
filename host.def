@@ -13,3 +13,9 @@ EXPORTS
 ClosePowerShellObject
 AddPSObjectArgument
 AddPSObjectArguments
+
+
+GetPSObjectType
+GetPSObjectToString
+IsPSObjectNullptr
+
