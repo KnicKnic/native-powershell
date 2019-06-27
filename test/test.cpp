@@ -71,7 +71,9 @@ int main()
     auto powershell = CreatePowershell(runspace);
     //AddScriptSpecifyScope(powershell, L"c:\\code\\psh_host\\script.ps1", 1);
     //AddCommand(powershell, L"c:\\code\\go-net\\t3.ps1");
-    AddCommandSpecifyScope(powershell, L"c:\\code\\go-net\\t3.ps1", 0);
+    //AddScriptSpecifyScope(powershell, L"write-host $pwd", 0);
+
+	AddCommandSpecifyScope(powershell, L"..\\..\\go-net\\t3.ps1", 0);
     //AddScriptSpecifyScope(powershell, L"$a = \"asdf\"", 0);
     //AddArgument(powershell, L"c:\\ddddddd");
     {
@@ -81,7 +83,7 @@ int main()
 
     powershell = CreatePowershell(runspace);
     //AddScriptSpecifyScope(powershell, L"c:\\code\\psh_host\\script.ps1", 1);
-    AddCommandSpecifyScope(powershell, L"c:\\code\\go-net\\t3.ps1", 0);
+    AddCommandSpecifyScope(powershell, L"..\\..\\go-net\\t3.ps1", 0);
     //AddScriptSpecifyScope(powershell, L"write-host $a", 0);
 
     //AddCommand(powershell, L"c:\\code\\go-net\\t3.ps1");
