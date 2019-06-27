@@ -50,11 +50,26 @@ long AddCommand(PowershellHandle handle, StringPtr command)
 }
 long AddArgument(PowershellHandle handle, StringPtr argument)
 {
-    auto managedArgument = msclr::interop::marshal_as<System::String^>(argument);
-    auto powershell = HandleTable::GetPowershell(handle)->powershell;
-    powershell->AddArgument(managedArgument);
-    return 0;
+	auto managedArgument = msclr::interop::marshal_as<System::String^>(argument);
+	auto powershell = HandleTable::GetPowershell(handle)->powershell;
+	powershell->AddArgument(managedArgument);
+	return 0;
 }
+long AddPSObjectArgument(PowershellHandle handle, PowerShellObject object)
+{
+	PSObject^ psObject = HandleTable::GetPSObject(object);
+	auto powershell = HandleTable::GetPowershell(handle)->powershell;
+	powershell->AddArgument(psObject->BaseObject);
+	return 0;
+}
+long AddPSObjectArguments(PowershellHandle handle, PowerShellObject* objects, unsigned int count)
+{
+	for (unsigned int i = 0; i < count; ++i) {
+		AddPSObjectArgument(handle, objects[i]);
+	}
+	return 0;
+}
+
 long AddScript(PowershellHandle handle, StringPtr path) {
     return AddScriptSpecifyScope(handle, path, (char)1);
 }

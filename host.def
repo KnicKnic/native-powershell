@@ -11,3 +11,5 @@ EXPORTS
 	AddScriptSpecifyScope
 	AddCommandSpecifyScope
 ClosePowerShellObject
+AddPSObjectArgument
+AddPSObjectArguments

@@ -33,6 +33,8 @@ extern "C" {
     long AddCommand(PowershellHandle handle, StringPtr command);
     long AddCommandSpecifyScope(PowershellHandle handle, StringPtr command, char useLocalScope);
 	long AddArgument(PowershellHandle handle, StringPtr argument);
+	long AddPSObjectArgument(PowershellHandle handle, PowerShellObject object);
+	long AddPSObjectArguments(PowershellHandle handle, PowerShellObject* objects, unsigned int count);
 
     // caller is responsible for calling ClosePowerShellObject on all returned objects, as well as
     // calling the appropriate free routine on objects assuming it is not nullptr

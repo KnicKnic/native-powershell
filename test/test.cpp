@@ -33,34 +33,77 @@ extern "C" {
     }
 }
 
+template<typename T>
+class ZeroResetable {
+	T var;
+public:
+	ZeroResetable() : var(T{ 0 }) {}
+	ZeroResetable(ZeroResetable&& rhs) : var(rhs.var) {
+		rhs.var = T{ 0 };
+	}
+	ZeroResetable& operator=(ZeroResetable&& rhs) {
+		var = rhs.var;
+		rhs.var = T{ 0 };
+		return *this;
+	}
+	ZeroResetable& operator=(T& rhs) {
+		var = rhs;
+		return *this;
+	}
+	ZeroResetable& operator=(T&& rhs) {
+		var = rhs;
+		return *this;
+	}
+	~ZeroResetable() {
+		var = T{ 0 };
+	}
+	operator T& () { return var; }
+	operator const T& ()const { return var; }
+	T& get() { return var; }
+	template<typename Y>
+	auto operator[](Y i) {
+		return var[i];
+	}
+	T* operator->() { return &var; }
+	auto operator*() { return *var; }
+	T* operator&() { return &var; }
+	const bool operator!=(T t) const{ return var != t; }
+};
+
+#define DENY_COPY(T) T(T&)=delete ; T& operator=(T&) = delete;
+#define DEFAULT_MOVE(T) T(T&&)=default; T& operator=(T&&) = default;
+
 class Invoker {
 public:
     Invoker(PowershellHandle handle) {
-        exception = InvokeCommand(handle, &objects, &objectCount);
+        exception = InvokeCommand(handle, &objects, &count);
     }
+	DENY_COPY(Invoker);
+	DEFAULT_MOVE(Invoker);
+	//Invoker(Invoker&) = delete; Invoker& operator=(Invoker&) = delete;
     ~Invoker() {
-        for (unsigned int i = 0; i < objectCount; ++i) {
+        for (unsigned int i = 0; i < count; ++i) {
             ClosePowerShellObject(objects[i]);
         }
         if (objects != nullptr) {
             free(objects);
-            objectCount = 0;
+            count = 0;
         }
         ClosePowerShellObject(exception);
     }
-    bool CallFailed() const {
+    const bool CallFailed() const {
         return exception != nullptr;
     }
-    unsigned int Count()const {
-        return objectCount;
-    }
-    PowerShellObject operator[](unsigned int i) {
-        return objects[i];
-    }
+	PowerShellObject operator[](unsigned int i) {
+		return objects[i];
+	}
+	PowerShellObject* results() {
+		return objects;
+	}
+	ZeroResetable< PowerShellObject*> objects;
+	ZeroResetable< unsigned int> count;
+	ZeroResetable< PowerShellObject> exception;
 private:
-    PowerShellObject* objects = nullptr;
-    unsigned int objectCount = 0;
-    PowerShellObject exception = nullptr;
 };
 
 
@@ -72,12 +115,24 @@ int main()
     //AddScriptSpecifyScope(powershell, L"c:\\code\\psh_host\\script.ps1", 1);
     //AddCommand(powershell, L"c:\\code\\go-net\\t3.ps1");
     //AddScriptSpecifyScope(powershell, L"write-host $pwd", 0);
+    AddScriptSpecifyScope(powershell, L"dir c:\\", 1);
 
-	AddCommandSpecifyScope(powershell, L"..\\..\\go-net\\t3.ps1", 0);
+	//AddCommandSpecifyScope(powershell, L"..\\..\\go-net\\t3.ps1", 0);
     //AddScriptSpecifyScope(powershell, L"$a = \"asdf\"", 0);
     //AddArgument(powershell, L"c:\\ddddddd");
     {
         Invoker invoke(powershell);
+
+
+		auto powershell2 = CreatePowershell(runspace);
+
+		// note below will write to output, not return objects	
+		AddScriptSpecifyScope(powershell2, L"write-host 'about to enumerate directory'; write-host $args; $len = $args.length; write-host \"arg count $len\"; $args | ft | out-string | write-host", 0);
+		AddArgument(powershell2, L"String to start");
+		AddPSObjectArguments(powershell2, invoke.objects, invoke.count);
+		AddArgument(powershell2, L"String to end");
+
+		Invoker invoke2(powershell2);
     }
     DeletePowershell(powershell);
 
