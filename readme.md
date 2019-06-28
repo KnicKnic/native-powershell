@@ -28,3 +28,16 @@ Lastly you can initialize all the logging functions for powershell. This means n
 ## Host to Powershell
 From hosting layer to powershell it is all strings and previously returned objects. The thought process is this string could be whatever you want and you can just convert it in powershell. I will give some examples.
 
+
+# Docs
+Generic info about writting a hosting app
+https://docs.microsoft.com/en-us/powershell/developer/windows-powershell
+
+writting a custom host
+https://docs.microsoft.com/en-us/powershell/developer/hosting/host03-sample
+
+injecting a cmdlet into your host
+https://docs.microsoft.com/en-us/powershell/developer/hosting/runspace10-sample
+
+shows how to change default session state parameters (this is used to change error preferences to log details to host ($DebugPreference = Continue))
+https://docs.microsoft.com/en-us/powershell/developer/hosting/windows-powershell01-sample
