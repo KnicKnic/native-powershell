@@ -18,4 +18,5 @@ AddPSObjectArguments
 GetPSObjectType
 GetPSObjectToString
 IsPSObjectNullptr
+AddPSObjectHandle
 

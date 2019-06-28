@@ -283,3 +283,7 @@ char IsPSObjectNullptr(PowerShellObject handle) {
     return (char)(0);
 }
 
+PowerShellObject AddPSObjectHandle(PowerShellObject handle) {
+    return HandleTable::InsertPSObject(HandleTable::GetPSObject(handle));
+}
+

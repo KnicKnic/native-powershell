@@ -46,6 +46,7 @@ extern "C" {
     StringPtr GetPSObjectType(PowerShellObject handle);
     StringPtr GetPSObjectToString(PowerShellObject handle);
     char IsPSObjectNullptr(PowerShellObject handle);
+    PowerShellObject AddPSObjectHandle(PowerShellObject handle);
 
 #ifdef __cplusplus
 }
