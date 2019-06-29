@@ -32,11 +32,25 @@ extern "C" {
         auto realContext = (SomeContext*)context;
         std::wcout << realContext->LoggerContext << std::wstring(s) << L'\n';
     }
-    const wchar_t* Command(void * context, const wchar_t* s)
+    void Command(void * context, const wchar_t* s, JsonReturnValues* returnValues)
     {
         auto realContext = (SomeContext*)context;
         std::wcout << realContext->CommandContext << std::wstring(s) << L'\n';
-        return MallocCopy(s);
+
+        // allocate return object holders
+        returnValues->count = 1;
+        returnValues->objects = (GenericPowershellObject*)malloc(sizeof(*(returnValues->objects)) * returnValues->count);
+        if (returnValues->objects == nullptr) {
+            throw "memory allocation failed for return values in command";
+        }
+
+        // allocate and fill out each object
+        auto& object = returnValues->objects[0];
+        object.releaseObject = (char)1;
+        object.type = PowershellObjectTypeString;
+        object.instance.string = MallocCopy(s);
+
+        return;
     }
 
     unsigned char* MallocWrapper(unsigned long long size) {

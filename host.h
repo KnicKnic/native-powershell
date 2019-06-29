@@ -2,10 +2,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+    
     #define InvalidPowershellHandleValue (void *)0;
     typedef void (*FreePointer)(void*);
     typedef unsigned char* (*AllocPointer)(unsigned long long size);
-    typedef const wchar_t * (*ReceiveJsonCommand)(void *context, const wchar_t* command);
     typedef void (*LogString)(void * context, const wchar_t* messages);
 
     void InitLibrary( AllocPointer, FreePointer);
@@ -14,10 +14,29 @@ extern "C" {
     typedef struct PowershellHandle_ {} *PowershellHandle;
     typedef struct PowerShellObject_ {} *PowerShellObject;
 	//typedef RunspaceHandle_d * RunspaceHandle;
-
-
-
+       
     typedef const wchar_t* StringPtr;
+
+
+
+    typedef enum PowershellObjectType_ { PowershellObjectTypeString, PowershellObjectHandle }PowershellObjectType;
+
+    typedef struct GenericPowershellObject_ {
+        PowershellObjectType type;
+        union PowershellObjectInstance {
+            StringPtr string;
+            PowerShellObject psObject;
+            // continue for other ones such as UInt64...
+        } instance;
+        char releaseObject; // if true reciever of this object will release the instance
+    }GenericPowershellObject, * PGenericPowershellObject;
+
+
+    typedef struct JsonReturnValues_ {
+        GenericPowershellObject* objects;
+        unsigned long           count;
+    }JsonReturnValues,*PJsonReturnValues;
+    typedef void (*ReceiveJsonCommand)(void* context, const wchar_t* command, JsonReturnValues* returnValues);
 
 	PowershellHandle CreatePowershell(RunspaceHandle handle);
 

@@ -191,13 +191,52 @@ protected:
         if (sendJsonCommand != nullptr)
         {
             std::wstring commandInput = msclr::interop::marshal_as<std::wstring>(message);
-            auto output = MakeAutoDllFree(sendJsonCommand(host->runspace->context, commandInput.c_str()));
+
+            JsonReturnValues returnValues;
+            returnValues.count = 0;
+            returnValues.objects = nullptr;
+            sendJsonCommand(host->runspace->context, commandInput.c_str(), &returnValues);
+            auto freeObjectList = MakeAutoDllFree(returnValues.objects);
+            for (unsigned long i = 0; i < returnValues.count; ++i) {
+                auto& object = returnValues.objects[i];
+                switch (object.type) {
+                case PowershellObjectTypeString:
+                {
+                    auto outputManaged = msclr::interop::marshal_as<System::String^>(object.instance.string);
+                    if (object.releaseObject != (char)0)
+                    {
+                        auto freeString = MakeAutoDllFree(object.instance.string);
+                    }
+                    WriteObject(outputManaged, false);
+                    break;
+                }
+                case PowershellObjectHandle:
+                {
+                    auto psObject = HandleTable::GetPSObject(object.instance.psObject);
+                    if (psObject != nullptr && psObject->BaseObject != nullptr)
+                    {
+                        WriteObject(psObject, false);
+                    }
+                    else {
+                        WriteObject(nullptr, false);
+                    }
+                    if (object.releaseObject != (char)0)
+                    {
+                        HandleTable::RemovePSObject(object.instance.psObject);
+                    }
+                    break;
+                }
+                default:
+                    throw "should not hit default case";
+                    
+                }
+            }
             //const wchar_t * output = host->runspace->sendJsonCommand(commandInput.c_str());
             //std::unique_ptr<const wchar_t, FreePointerHelper> outputReleaser(output);
-            if (output != nullptr) {
-                auto outputManaged = msclr::interop::marshal_as<System::String^>(output.get());
-                WriteObject(outputManaged, false);
-            }
+            //if (output != nullptr) {
+            //    auto outputManaged = msclr::interop::marshal_as<System::String^>(output.get());
+            //    WriteObject(outputManaged, false);
+            //}
         }
     }
 
