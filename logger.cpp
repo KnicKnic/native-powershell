@@ -20,7 +20,9 @@ void Logger::LogWrapper(LogString func, LPCWSTR prepend, const std::wstring& log
         if (prepend != nullptr)
             message = prepend;
         message = message + log;
-        BaseLogString(context, message.c_str());
+        if (BaseLogString != nullptr) {
+            BaseLogString(context, message.c_str());
+        }
     }
     else {
         func(context, log.c_str());
@@ -44,7 +46,9 @@ void Logger::LogError(const std::wstring & log) {
 }
 
 void Logger::Log(const std::wstring & log) {
-    BaseLogString(context, log.c_str());
+    if (BaseLogString != nullptr) {
+        BaseLogString(context, log.c_str());
+    }
 }
 
 

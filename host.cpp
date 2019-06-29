@@ -186,16 +186,18 @@ protected:
 
         //std::wstring nativeString = msclr::interop::marshal_as<std::wstring>(message);
         //printf("printf: %ws\n", nativeString.c_str());
-
         MyHost^ host = safe_cast<MyHost^>(this->CommandRuntime->Host->PrivateData->BaseObject);
-
-        std::wstring commandInput = msclr::interop::marshal_as<std::wstring>(message);
-        auto output = MakeAutoDllFree( host->runspace->sendJsonCommand(host->runspace->context, commandInput.c_str()));
-        //const wchar_t * output = host->runspace->sendJsonCommand(commandInput.c_str());
-        //std::unique_ptr<const wchar_t, FreePointerHelper> outputReleaser(output);
-        if (output != nullptr) {
-            auto outputManaged = msclr::interop::marshal_as<System::String^>(output.get());
-            WriteObject(outputManaged, false);
+        auto sendJsonCommand = host->runspace->sendJsonCommand;
+        if (sendJsonCommand != nullptr)
+        {
+            std::wstring commandInput = msclr::interop::marshal_as<std::wstring>(message);
+            auto output = MakeAutoDllFree(sendJsonCommand(host->runspace->context, commandInput.c_str()));
+            //const wchar_t * output = host->runspace->sendJsonCommand(commandInput.c_str());
+            //std::unique_ptr<const wchar_t, FreePointerHelper> outputReleaser(output);
+            if (output != nullptr) {
+                auto outputManaged = msclr::interop::marshal_as<System::String^>(output.get());
+                WriteObject(outputManaged, false);
+            }
         }
     }
 
