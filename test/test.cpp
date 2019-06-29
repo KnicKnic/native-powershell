@@ -20,14 +20,22 @@ const wchar_t* MallocCopy(const wchar_t* str)
     std::copy(str, str + s, dest);
     return (const wchar_t*)dest;
 }
+
+struct SomeContext {
+    std::wstring LoggerContext;
+    std::wstring CommandContext;
+};
+
 extern "C" {
-    void Logger(const wchar_t* s)
+    void Logger(void * context, const wchar_t* s)
     {
-        std::wcout << L"My Member Logger: " << std::wstring(s) << L'\n';
+        auto realContext = (SomeContext*)context;
+        std::wcout << realContext->LoggerContext << std::wstring(s) << L'\n';
     }
-    const wchar_t* Command(const wchar_t* s)
+    const wchar_t* Command(void * context, const wchar_t* s)
     {
-        std::wcout << L"Send command got: " << std::wstring(s) << L'\n';
+        auto realContext = (SomeContext*)context;
+        std::wcout << realContext->CommandContext << std::wstring(s) << L'\n';
         return MallocCopy(s);
     }
 
@@ -138,7 +146,8 @@ std::wstring GetToString(PowerShellObject handle) {
 int main()
 {
     InitLibrary(MallocWrapper, free);
-    auto runspace = CreateRunspace(Command, Logger);
+    SomeContext context{ L"MyLoggerContext: ", L"MyCommandContext: " };
+    auto runspace = CreateRunspace(&context, Command, Logger);
     auto powershell = CreatePowershell(runspace);
     //AddScriptSpecifyScope(powershell, L"c:\\code\\psh_host\\script.ps1", 1);
     //AddCommand(powershell, L"c:\\code\\go-net\\t3.ps1");
@@ -159,7 +168,7 @@ int main()
 		auto powershell2 = CreatePowershell(runspace);
 
 		// note below will write to output, not return objects	
-		AddScriptSpecifyScope(powershell2, L"write-host 'about to enumerate directory'; write-host $args; $len = $args.length; write-host \"arg count $len\"; $args | ft | out-string | write-host", 0);
+		AddScriptSpecifyScope(powershell2, L"write-host 'about to enumerate directory'; write-host $args; $len = $args.length; write-host \"arg count $len\"; $args | ft | out-string | write-host; send-hostcommand -message 'I sent the host a command'", 0);
 		AddArgument(powershell2, L"String to start");
 		AddPSObjectArguments(powershell2, invoke.objects, invoke.count);
 		AddArgument(powershell2, L"String to end");

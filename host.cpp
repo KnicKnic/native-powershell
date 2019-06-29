@@ -190,7 +190,7 @@ protected:
         MyHost^ host = safe_cast<MyHost^>(this->CommandRuntime->Host->PrivateData->BaseObject);
 
         std::wstring commandInput = msclr::interop::marshal_as<std::wstring>(message);
-        auto output = MakeAutoDllFree( host->runspace->sendJsonCommand(commandInput.c_str()));
+        auto output = MakeAutoDllFree( host->runspace->sendJsonCommand(host->runspace->context, commandInput.c_str()));
         //const wchar_t * output = host->runspace->sendJsonCommand(commandInput.c_str());
         //std::unique_ptr<const wchar_t, FreePointerHelper> outputReleaser(output);
         if (output != nullptr) {
@@ -226,7 +226,7 @@ void SetISSEV(
 
   throw gcnew System::IndexOutOfRangeException;
 }
-RunspaceHandle CreateRunspace(ReceiveJsonCommand receiveJsonCommand, LogString BaseLogString)
+RunspaceHandle CreateRunspace(void * context, ReceiveJsonCommand receiveJsonCommand, LogString BaseLogString)
 {
     auto iss = InitialSessionState::CreateDefault();
     // Add the get-proc cmdlet to the InitialSessionState object.
@@ -241,8 +241,8 @@ RunspaceHandle CreateRunspace(ReceiveJsonCommand receiveJsonCommand, LogString B
     SetISSEV(iss->Variables, "InformationPreference", System::Management::Automation::ActionPreference::Continue);
 
     
-    auto logger = gcnew Logger(BaseLogString);
-    auto holder = gcnew RunspaceHolder(receiveJsonCommand, logger);
+    auto logger = gcnew Logger(context, BaseLogString);
+    auto holder = gcnew RunspaceHolder(context, receiveJsonCommand, logger);
     auto host = gcnew MyHost(holder);
     Runspace^ runspace = RunspaceFactory::CreateRunspace(host,iss);
     holder->host = host;

@@ -14,9 +14,11 @@ public:
     ReceiveJsonCommand sendJsonCommand;
     Logger^ logger;
     MyHost^ host;
-    RunspaceHolder(ReceiveJsonCommand jsonCommand, Logger^ loggerParam)  
+    void* context;
+    RunspaceHolder(void * contextParam, ReceiveJsonCommand jsonCommand, Logger^ loggerParam)  
         : sendJsonCommand(jsonCommand)
         , logger(loggerParam)
+        , context(contextParam)
     {}
     ~RunspaceHolder();
 };

@@ -10,7 +10,7 @@ void Logger::LogWrapperAddNewLine(LogString writeLine, Logger::WriteLoggerDelega
         write(message);
     }
     else {
-        writeLine(log.c_str());
+        writeLine(context, log.c_str());
     }
 }
 
@@ -20,10 +20,10 @@ void Logger::LogWrapper(LogString func, LPCWSTR prepend, const std::wstring& log
         if (prepend != nullptr)
             message = prepend;
         message = message + log;
-        BaseLogString(message.c_str());
+        BaseLogString(context, message.c_str());
     }
     else {
-        func(log.c_str());
+        func(context, log.c_str());
     }
 }
 
@@ -44,7 +44,7 @@ void Logger::LogError(const std::wstring & log) {
 }
 
 void Logger::Log(const std::wstring & log) {
-    BaseLogString(log.c_str());
+    BaseLogString(context, log.c_str());
 }
 
 

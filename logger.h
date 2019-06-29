@@ -6,7 +6,7 @@
 #include <string>
 ref class Logger {
 public:
-    Logger(LogString WriteFunc) : BaseLogString(WriteFunc) {
+    Logger(void * contextParam, LogString WriteFunc) : BaseLogString(WriteFunc), context(contextParam) {
         LogWarningDelegate = gcnew WriteLoggerDelegate(this, &Logger::LogWarning);
         LogInformationDelegate = gcnew WriteLoggerDelegate(this, &Logger::LogInformation);
         LogVerboseDelegate = gcnew WriteLoggerDelegate(this, &Logger::LogVerbose);
@@ -57,6 +57,7 @@ public:
     void LogLineError(System::String^ log);
     void LogLine(System::String^ log);
 private:
+    void* context;
     delegate void WriteLoggerDelegate(const std::wstring&);
 
     WriteLoggerDelegate^ LogWarningDelegate;

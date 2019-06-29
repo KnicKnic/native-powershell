@@ -5,8 +5,8 @@ extern "C" {
     #define InvalidPowershellHandleValue (void *)0;
     typedef void (*FreePointer)(void*);
     typedef unsigned char* (*AllocPointer)(unsigned long long size);
-    typedef const wchar_t * (*ReceiveJsonCommand)(const wchar_t*);
-    typedef void (*LogString)(const wchar_t*);
+    typedef const wchar_t * (*ReceiveJsonCommand)(void *context, const wchar_t* command);
+    typedef void (*LogString)(void * context, const wchar_t* messages);
 
     void InitLibrary( AllocPointer, FreePointer);
 
@@ -25,7 +25,7 @@ extern "C" {
 	void DeletePowershell(PowershellHandle handle);
 
 
-	RunspaceHandle CreateRunspace(ReceiveJsonCommand, LogString );
+	RunspaceHandle CreateRunspace(void * context, ReceiveJsonCommand, LogString );
 
 	void DeleteRunspace(RunspaceHandle handle);
 
