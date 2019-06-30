@@ -7,6 +7,9 @@
 
 using namespace std;
 
+std::wstring GetType(PowerShellObject handle);
+std::wstring GetToString(PowerShellObject handle);
+
 const wchar_t* MallocCopy(const wchar_t* str)
 {
     if (str == nullptr)
@@ -32,13 +35,19 @@ extern "C" {
         auto realContext = (SomeContext*)context;
         std::wcout << realContext->LoggerContext << std::wstring(s) << L'\n';
     }
-    void Command(void * context, const wchar_t* s, JsonReturnValues* returnValues)
+    void Command(void * context, const wchar_t* s, PowerShellObject *input, unsigned long long inputCount, JsonReturnValues* returnValues)
     {
+        input; inputCount;
         auto realContext = (SomeContext*)context;
         std::wcout << realContext->CommandContext << std::wstring(s) << L'\n';
 
+        for (size_t i = 0; i < inputCount; ++i) {
+            auto& v = input[i];
+            std::wcout << L"In data processing got " << GetToString(v) <<L" of type " << GetType(v) << L'\n';
+        }
+
         // allocate return object holders
-        returnValues->count = 1;
+        returnValues->count = 1 + inputCount;
         returnValues->objects = (GenericPowershellObject*)malloc(sizeof(*(returnValues->objects)) * returnValues->count);
         if (returnValues->objects == nullptr) {
             throw "memory allocation failed for return values in command";
@@ -49,6 +58,13 @@ extern "C" {
         object.releaseObject = (char)1;
         object.type = PowershellObjectTypeString;
         object.instance.string = MallocCopy(s);
+
+        for (size_t i = 0; i < inputCount; ++i) {
+            auto& v = returnValues->objects[1+i];
+            v.releaseObject = (char)0;
+            v.type = PowershellObjectHandle;
+            v.instance.psObject = input[i];
+        }
 
         return;
     }
@@ -182,7 +198,7 @@ int main()
 		auto powershell2 = CreatePowershell(runspace);
 
 		// note below will write to output, not return objects	
-		AddScriptSpecifyScope(powershell2, L"write-host 'about to enumerate directory'; write-host $args; $len = $args.length; write-host \"arg count $len\"; $args | ft | out-string | write-host; send-hostcommand -message 'I sent the host a command'", 0);
+		AddScriptSpecifyScope(powershell2, L"write-host 'about to enumerate directory'; write-host $args; $len = $args.length; write-host \"arg count $len\"; $args | ft | out-string | write-host; @(1,'asdf',$null,$false) | send-hostcommand -message 'I sent the host a command' | write-host", 0);
 		AddArgument(powershell2, L"String to start");
 		AddPSObjectArguments(powershell2, invoke.objects, invoke.count);
 		AddArgument(powershell2, L"String to end");

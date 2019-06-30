@@ -36,7 +36,7 @@ extern "C" {
         GenericPowershellObject* objects;
         unsigned long           count;
     }JsonReturnValues,*PJsonReturnValues;
-    typedef void (*ReceiveJsonCommand)(void* context, const wchar_t* command, JsonReturnValues* returnValues);
+    typedef void (*ReceiveJsonCommand)(void* context, const wchar_t* command, PowerShellObject * inputs, unsigned long long inputCount, JsonReturnValues* returnValues);
 
 	PowershellHandle CreatePowershell(RunspaceHandle handle);
 

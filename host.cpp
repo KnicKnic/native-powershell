@@ -162,15 +162,48 @@ void DeletePowershell(PowershellHandle handle)
 public ref class SendHostCommand : Cmdlet
 {
 public:
-    [Parameter(Position = 0)]
-    property System::String^ message;
-        /// <summary>
-        /// For each of the requested process names, retrieve and write
-        /// the associated processes.
-        /// </summary>
+    [Parameter(Position = 0, Mandatory = true)]
+    property System::String ^ message;
+    /// <summary>
+    /// For each of the requested process names, retrieve and write
+    /// the associated processes.
+    /// </summary>
+
+    [Parameter(Position = 0, Mandatory = false, ValueFromPipeline=true)]
+    property array<System::Object^>^ input;
+private:
+    List<PSObject^>^ inputObjects = gcnew List<PSObject^>();
 protected:
     void ProcessRecord()override
     {
+        Cmdlet::ProcessRecord();
+        //Console::WriteLine("In Process, count: {0}, firstValue {1}, first type {2}", input->Length, input[0]->ToString(), input[0]->GetType());
+        
+        //if $null is passed, then input is null. We will assume it is always 1 object(I think it is)
+        if (input == nullptr) {
+            inputObjects->Add(MakePSObject(nullptr));
+        }
+        else {
+            for each (auto obj in input) {
+                inputObjects->Add(MakePSObject(obj));
+            }
+        }
+    }
+
+    PSObject^ MakePSObject(System::Object^ obj) {
+        if (obj == nullptr) {
+            //return gcnew PSObject(nullptr);
+            return nullptr;
+        }
+        if (obj->GetType() == PSObject::typeid) {
+            return safe_cast<PSObject^>(obj);
+        }
+        return gcnew PSObject(obj);
+    }
+
+    void EndProcessing()override
+    {
+        Cmdlet::EndProcessing();
         //// Get the current processes.
 
         //array< int >^ processes = gcnew array< int >(3);
@@ -190,12 +223,19 @@ protected:
         auto sendJsonCommand = host->runspace->sendJsonCommand;
         if (sendJsonCommand != nullptr)
         {
+            std::vector<PowerShellObject> inputObjectsC;
+            inputObjectsC.reserve(inputObjects->Count);
+            for each (auto obj in inputObjects)
+            {
+                inputObjectsC.push_back(HandleTable::InsertPSObject(obj));
+            }
+
             std::wstring commandInput = msclr::interop::marshal_as<std::wstring>(message);
 
             JsonReturnValues returnValues;
             returnValues.count = 0;
             returnValues.objects = nullptr;
-            sendJsonCommand(host->runspace->context, commandInput.c_str(), &returnValues);
+            sendJsonCommand(host->runspace->context, commandInput.c_str(),inputObjectsC.data(), inputObjectsC.size(), &returnValues);
             auto freeObjectList = MakeAutoDllFree(returnValues.objects);
             for (unsigned long i = 0; i < returnValues.count; ++i) {
                 auto& object = returnValues.objects[i];
@@ -230,6 +270,9 @@ protected:
                     throw "should not hit default case";
                     
                 }
+            }
+            for (auto& obj : inputObjectsC) {
+                HandleTable::RemovePSObject(obj);
             }
             //const wchar_t * output = host->runspace->sendJsonCommand(commandInput.c_str());
             //std::unique_ptr<const wchar_t, FreePointerHelper> outputReleaser(output);
