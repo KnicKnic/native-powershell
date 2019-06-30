@@ -198,7 +198,12 @@ int main()
 		auto powershell2 = CreatePowershell(runspace);
 
 		// note below will write to output, not return objects	
-		AddScriptSpecifyScope(powershell2, L"write-host 'about to enumerate directory'; write-host $args; $len = $args.length; write-host \"arg count $len\"; $args | ft | out-string | write-host; @(1,'asdf',$null,$false) | send-hostcommand -message 'I sent the host a command' | write-host", 0);
+		AddScriptSpecifyScope(powershell2, 
+            L"write-host 'about to enumerate directory';"
+            L"write-host $args; $len = $args.length; write-host \"arg count $len\";"
+            L"$args | ft | out-string | write-host;"
+            L"@(1,'asdf',$null,$false) | send-hostcommand -message 'I sent the host a command' | write-host;"
+            L"send-hostcommand -message 'I sent the host a command' | write-host", 0);
 		AddArgument(powershell2, L"String to start");
 		AddPSObjectArguments(powershell2, invoke.objects, invoke.count);
 		AddArgument(powershell2, L"String to end");
