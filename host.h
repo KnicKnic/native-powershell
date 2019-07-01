@@ -10,9 +10,13 @@ extern "C" {
 
     void InitLibrary( AllocPointer, FreePointer);
 
-	typedef struct RunspaceHandle_ {} *RunspaceHandle;
-    typedef struct PowershellHandle_ {} *PowershellHandle;
-    typedef struct PowerShellObject_ {} *PowerShellObject;
+	//typedef struct RunspaceHandle_ {} *RunspaceHandle;
+ //   typedef struct PowershellHandle_ {} *PowershellHandle;
+ //   typedef struct PowerShellObject_ {} *PowerShellObject;
+#define PowershellHostEmptyHandleValue 0
+    typedef unsigned long long RunspaceHandle;
+    typedef unsigned long long PowershellHandle;
+    typedef unsigned long long PowerShellObject;
 	//typedef RunspaceHandle_d * RunspaceHandle;
        
     typedef const wchar_t* StringPtr;

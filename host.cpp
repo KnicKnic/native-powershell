@@ -169,7 +169,7 @@ public:
     /// the associated processes.
     /// </summary>
 
-    [Parameter(Position = 0, Mandatory = false, ValueFromPipeline=true)]
+    [Parameter( Mandatory = false, ValueFromPipeline=true)]
     property array<System::Object^>^ input;
 private:
     List<PSObject^>^ inputObjects = gcnew List<PSObject^>();
@@ -204,25 +204,23 @@ protected:
     void EndProcessing()override
     {
         Cmdlet::EndProcessing();
-        //// Get the current processes.
 
-        //array< int >^ processes = gcnew array< int >(3);
-        //processes[0] = 5;
-        //processes[1] = 6;
-        //processes[2] = 7;
-
-        //// Write the processes to the pipeline making them available
-        //// to the next cmdlet. The second argument (true) tells the
-        //// system to enumerate the array, and send one process object
-        //// at a time to the pipeline.
-        //WriteObject(processes, true);
-
-        //std::wstring nativeString = msclr::interop::marshal_as<std::wstring>(message);
-        //printf("printf: %ws\n", nativeString.c_str());
         MyHost^ host = safe_cast<MyHost^>(this->CommandRuntime->Host->PrivateData->BaseObject);
         auto sendJsonCommand = host->runspace->sendJsonCommand;
         if (sendJsonCommand != nullptr)
         {
+            // TODO: figure out how to differentiate between below
+            //
+            // by default if no input specified we get 1 nullptr object input
+            // to clean this up, we delete all single list that is nullptr
+            //
+            // one problem with this approach is we cannot differentiate between
+            // `$null | send-hostcommand -message "foo"`
+            // `send-hostcommand -message "foo"
+            if (inputObjects->Count == 1 && inputObjects[0] == nullptr) {
+                inputObjects = gcnew List<PSObject^>();
+            }
+
             std::vector<PowerShellObject> inputObjectsC;
             inputObjectsC.reserve(inputObjects->Count);
             for each (auto obj in inputObjects)
@@ -274,12 +272,6 @@ protected:
             for (auto& obj : inputObjectsC) {
                 HandleTable::RemovePSObject(obj);
             }
-            //const wchar_t * output = host->runspace->sendJsonCommand(commandInput.c_str());
-            //std::unique_ptr<const wchar_t, FreePointerHelper> outputReleaser(output);
-            //if (output != nullptr) {
-            //    auto outputManaged = msclr::interop::marshal_as<System::String^>(output.get());
-            //    WriteObject(outputManaged, false);
-            //}
         }
     }
 

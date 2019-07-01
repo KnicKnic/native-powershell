@@ -138,7 +138,7 @@ public:
         ClosePowerShellObject(exception);
     }
     const bool CallFailed() const {
-        return exception != nullptr;
+        return exception.operator!=( PowershellHostEmptyHandleValue);
     }
 	PowerShellObject operator[](unsigned int i) {
 		return objects[i];
