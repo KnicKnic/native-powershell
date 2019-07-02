@@ -55,13 +55,13 @@ extern "C" {
 
         // allocate and fill out each object
         auto& object = returnValues->objects[0];
-        object.releaseObject = (char)1;
+        object.releaseObject = char(1);
         object.type = PowershellObjectTypeString;
         object.instance.string = MallocCopy(s);
 
         for (size_t i = 0; i < inputCount; ++i) {
             auto& v = returnValues->objects[1+i];
-            v.releaseObject = (char)0;
+            v.releaseObject = char(0);
             v.type = PowershellObjectHandle;
             v.instance.psObject = input[i];
         }

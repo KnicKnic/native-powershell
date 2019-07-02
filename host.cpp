@@ -46,7 +46,7 @@ long AddCommandSpecifyScope(PowershellHandle handle, StringPtr command,char useL
 }
 long AddCommand(PowershellHandle handle, StringPtr command)
 {
-    return AddCommandSpecifyScope(handle, command, (char)1);
+    return AddCommandSpecifyScope(handle, command, char(1));
 }
 long AddArgument(PowershellHandle handle, StringPtr argument)
 {
@@ -77,7 +77,7 @@ long AddPSObjectArguments(PowershellHandle handle, PowerShellObject* objects, un
 }
 
 long AddScript(PowershellHandle handle, StringPtr path) {
-    return AddScriptSpecifyScope(handle, path, (char)1);
+    return AddScriptSpecifyScope(handle, path, char(1));
 }
 long AddScriptSpecifyScope(PowershellHandle handle, StringPtr path, char useLocalScope) 
 {
@@ -241,7 +241,7 @@ protected:
                 case PowershellObjectTypeString:
                 {
                     auto outputManaged = msclr::interop::marshal_as<System::String^>(object.instance.string);
-                    if (object.releaseObject != (char)0)
+                    if (object.releaseObject != char(0))
                     {
                         auto freeString = MakeAutoDllFree(object.instance.string);
                     }
@@ -258,7 +258,7 @@ protected:
                     else {
                         WriteObject(nullptr, false);
                     }
-                    if (object.releaseObject != (char)0)
+                    if (object.releaseObject != char(0))
                     {
                         HandleTable::RemovePSObject(object.instance.psObject);
                     }
@@ -349,14 +349,17 @@ StringPtr GetPSObjectToString(PowerShellObject handle) {
     return MakeHostString(psObject->BaseObject->ToString());
 }
 char IsPSObjectNullptr(PowerShellObject handle) {
+    if (handle == EmptyPowerShellObjectHandle) {
+        return char(1);
+    }
     PSObject^ psObject = HandleTable::GetPSObject(handle);
     if (psObject == nullptr) {
-        return (char)(1);
+        return char(1);
     }
     if (psObject->BaseObject == nullptr) {
-        return (char)(1);
+        return char(1);
     }
-    return (char)(0);
+    return char(0);
 }
 
 PowerShellObject AddPSObjectHandle(PowerShellObject handle) {
