@@ -2,7 +2,6 @@
 
 #include "host.h"
 #include "logger.h"
-#include "autoptr.h"
 #include "host_internal.h"
 #include "typed_handles.h"
 using namespace System::Management::Automation;

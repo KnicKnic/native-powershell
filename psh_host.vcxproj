@@ -130,7 +130,6 @@
   <ItemGroup>
     <ClCompile Include="handle_table.cpp" />
     <ClCompile Include="host.cpp" />
-    <ClCompile Include="host_internal.cpp" />
     <ClCompile Include="logger.cpp" />
     <ClCompile Include="my_host.cpp" />
     <ClCompile Include="runspace.cpp" />

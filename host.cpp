@@ -97,10 +97,6 @@ PowerShellObject InvokeCommand(PowershellHandle handle, PowerShellObject **objec
     *objects = nullptr;
     System::Collections::ObjectModel::Collection<System::Management::Automation::PSObject^>^ results;
     try {
-        //auto invocationSettings = gcnew PSInvocationSettings();
-        //invocationSettings->ErrorActionPreference = System::Management::Automation::ActionPreference::Continue;
-        //invocationSettings->Host = powershellHolder->runspace->host;
-        //auto results = powershell->Invoke(nullptr, invocationSettings);
         results = powershell->Invoke();
     }
     //catch (System::Management::Automation::RuntimeException^ exception) {
@@ -156,7 +152,7 @@ void DeletePowershell(PowershellHandle handle)
 
 
 /// <summary>
-/// Class that implements the GetProcCommand.
+/// Class that implements the Send-HostCommand.
 /// </summary>
 [Cmdlet(VerbsCommunications::Send, "HostCommand")]
 public ref class SendHostCommand : Cmdlet
@@ -164,10 +160,6 @@ public ref class SendHostCommand : Cmdlet
 public:
     [Parameter(Position = 0, Mandatory = true)]
     property System::String ^ message;
-    /// <summary>
-    /// For each of the requested process names, retrieve and write
-    /// the associated processes.
-    /// </summary>
 
     [Parameter( Mandatory = false, ValueFromPipeline=true)]
     property array<System::Object^>^ input;
@@ -275,8 +267,7 @@ protected:
         }
     }
 
-} // End GetProcCommand class.
-;
+};
 
 
 

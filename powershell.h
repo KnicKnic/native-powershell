@@ -2,7 +2,6 @@
 #pragma once
 #include "host.h"
 #include "logger.h"
-#include "autoptr.h"
 #include "runspace.h"
 using namespace System::Management::Automation;
 using namespace System::Management::Automation::Host;

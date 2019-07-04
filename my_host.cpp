@@ -1,4 +1,4 @@
-//https://docs.microsoft.com/en-us/powershell/developer/hosting/host02-sample 
+// https://docs.microsoft.com/en-us/powershell/developer/hosting/host02-sample 
 
 
   using namespace System;

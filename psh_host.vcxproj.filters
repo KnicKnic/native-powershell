@@ -21,9 +21,6 @@
     <ClCompile Include="my_host.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="host_internal.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="runspace.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
