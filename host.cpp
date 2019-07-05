@@ -55,6 +55,16 @@ long AddArgument(PowershellHandle handle, StringPtr argument)
 	powershell->AddArgument(managedArgument);
 	return 0;
 }
+
+long AddParameterString(PowershellHandle handle, StringPtr name, StringPtr value) {
+
+    auto paramName = msclr::interop::marshal_as<System::String^>(name);
+    auto paramValue = msclr::interop::marshal_as<System::String^>(value);
+    auto powershell = HandleTable::GetPowershell(handle)->powershell;
+    powershell->AddParameter(paramName, paramValue);
+    return 0;
+}
+
 long AddPSObjectArgument(PowershellHandle handle, PowerShellObject object)
 {
 	PSObject^ psObject = HandleTable::GetPSObject(object);

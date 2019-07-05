@@ -4,6 +4,7 @@ EXPORTS
 	CreatePowershell
 	DeletePowershell
 	AddCommand
+	AddParameterString
 	AddArgument
 	InvokeCommand
 	AddScript
