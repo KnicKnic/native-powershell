@@ -44,9 +44,6 @@
     <ClInclude Include="logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AutoPtr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="powershell.h">
       <Filter>Header Files</Filter>
     </ClInclude>

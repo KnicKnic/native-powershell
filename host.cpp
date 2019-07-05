@@ -65,6 +65,27 @@ long AddParameterString(PowershellHandle handle, StringPtr name, StringPtr value
     return 0;
 }
 
+
+long AddParameterObject(PowershellHandle handle, StringPtr name, PowerShellObject object) {
+
+    auto paramName = msclr::interop::marshal_as<System::String^>(name);
+    auto powershell = HandleTable::GetPowershell(handle)->powershell;
+    if (object == EmptyPowerShellObjectHandle) {
+        powershell->AddParameter(paramName);
+    }
+    else {
+        PSObject^ psObject = HandleTable::GetPSObject(object);
+        if (psObject == nullptr)
+        {
+            powershell->AddParameter(paramName, nullptr);
+        }
+        else {
+            powershell->AddParameter(paramName, psObject->BaseObject);
+        }
+    }
+    return 0;
+}
+
 long AddPSObjectArgument(PowershellHandle handle, PowerShellObject object)
 {
 	PSObject^ psObject = HandleTable::GetPSObject(object);

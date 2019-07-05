@@ -135,7 +135,6 @@
     <ClCompile Include="runspace.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AutoPtr.h" />
     <ClInclude Include="handle_table.h" />
     <ClInclude Include="host.h" />
     <ClInclude Include="host_internal.h" />

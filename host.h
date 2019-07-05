@@ -56,6 +56,7 @@ extern "C" {
     long AddCommand(PowershellHandle handle, StringPtr command);
     long AddCommandSpecifyScope(PowershellHandle handle, StringPtr command, char useLocalScope);
     long AddParameterString(PowershellHandle handle, StringPtr name, StringPtr value);
+    long AddParameterObject(PowershellHandle handle, StringPtr name, PowerShellObject object);
 	long AddArgument(PowershellHandle handle, StringPtr argument);
 	long AddPSObjectArgument(PowershellHandle handle, PowerShellObject object);
 	long AddPSObjectArguments(PowershellHandle handle, PowerShellObject* objects, unsigned int count);
