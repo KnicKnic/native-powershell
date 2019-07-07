@@ -1,0 +1,3 @@
+[submodule "native-powershell-bin"]
+	path = native-powershell-bin
+	url = https://github.com/KnicKnic/native-powershell-bin.git
