@@ -7,7 +7,7 @@ Create a C Dll that can be used to execute powershell scripts and powershell com
 
 This is not a one way interaction like occurs via process exec. Callbacks are supported (powershell asynchronosly calling back into C) and you can keep context open / loaded across multiple invocations.
 
-I wrote this to create a golang binding. Since everyone has C bindings, you can follow that to create your own language binding.
+I wrote this to create a golang binding (https://github.com/KnicKnic/go-powershell). Since everyone has C bindings, you can follow that to create your own language binding.
 
 ## Non Goals - Simple Managed hosting
 If you want to host managed DLL's you could directly create a managed host and do it that way. This offers a very simple alternative. Write some wrappers in powershell or directly in the hosting language via powershell statements and away you go.
