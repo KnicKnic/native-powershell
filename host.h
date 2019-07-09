@@ -43,6 +43,7 @@ extern "C" {
     typedef void (*ReceiveJsonCommand)(void* context, const wchar_t* command, PowerShellObject * inputs, unsigned long long inputCount, JsonReturnValues* returnValues);
 
 	PowershellHandle CreatePowershell(RunspaceHandle handle);
+    PowershellHandle CreatePowershellNested(PowershellHandle handle);
 
 
 	void DeletePowershell(PowershellHandle handle);

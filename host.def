@@ -2,6 +2,7 @@ EXPORTS
 	CreateRunspace
 	DeleteRunspace
 	CreatePowershell
+	CreatePowershellNested
 	DeletePowershell
 	AddCommand
 	AddParameterString

@@ -129,26 +129,35 @@ std::wstring GetToString(PowerShellObject handle) {
 
 }
 
-Invoker RunScript(RunspaceHandle& runspace, std::wstring command, bool useLocalScope, const std::vector<std::wstring>& elems) {
+Invoker RunScript(RunspaceHandle& runspace, PowershellHandle * parent, std::wstring command, bool useLocalScope, const std::vector<std::wstring>& elems) {
 
-    auto powershell = CreatePowershell(runspace);
+    PowershellHandle powershell;
+    if (parent != nullptr) {
+        powershell = CreatePowershellNested(*parent);
+    }
+    else {
+        powershell = CreatePowershell(runspace);
+    }
     AddScriptSpecifyScope(powershell, command.c_str(), useLocalScope ? 1 : 0);
     for (auto& arg : elems) {
         AddArgument(powershell, arg.c_str());
     }
+    auto results = Invoker(powershell);
 
-    return Invoker(powershell);
+    DeletePowershell(powershell);
+    return results;
 }
-Invoker RunScript(RunspaceHandle& runspace, std::wstring command, bool useLocalScope, const std::wstring& elems) {
-    return RunScript(runspace, command, useLocalScope, std::vector<std::wstring>({ elems }));
+Invoker RunScript(RunspaceHandle& runspace, PowershellHandle* parent, std::wstring command, bool useLocalScope, const std::wstring& elems) {
+    return RunScript(runspace, parent, command, useLocalScope, std::vector<std::wstring>({ elems }));
 }
-Invoker RunScript(RunspaceHandle& runspace, std::wstring command, bool useLocalScope) {
-    return RunScript(runspace, command, useLocalScope, std::vector<std::wstring>({  }));
+Invoker RunScript(RunspaceHandle& runspace, PowershellHandle* parent, std::wstring command, bool useLocalScope) {
+    return RunScript(runspace, parent, command, useLocalScope, std::vector<std::wstring>({  }));
 }
-Invoker RunScript(RunspaceHandle& runspace, std::wstring command, bool useLocalScope, const std::wstring& elem1, const std::wstring& elem2) {
-    return RunScript(runspace, command, useLocalScope, std::vector<std::wstring>({ elem1, elem2 }));
+Invoker RunScript(RunspaceHandle& runspace, PowershellHandle* parent, std::wstring command, bool useLocalScope, const std::wstring& elem1, const std::wstring& elem2) {
+    return RunScript(runspace, parent, command, useLocalScope, std::vector<std::wstring>({ elem1, elem2 }));
 }
 RunspaceHandle globalRunspace;
+PowershellHandle * globalPowershell = nullptr;
 
 extern "C" {
     void Logger(void* context, const wchar_t* s)
@@ -158,13 +167,14 @@ extern "C" {
     }
     void Command(void* context, const wchar_t* s, PowerShellObject* input, unsigned long long inputCount, JsonReturnValues* returnValues)
     {
-        // RunScript(globalRunspace, L"[int]11", true);
 
         input; inputCount;
         auto realContext = (SomeContext*)context;
         std::wcout << realContext->CommandContext << std::wstring(s) << L'\n';
 
         for (size_t i = 0; i < inputCount; ++i) {
+            // test nested creation
+            RunScript(globalRunspace, globalPowershell, L"[int]11", true);
             auto& v = input[i];
             std::wcout << L"In data processing got " << GetToString(v) << L" of type " << GetType(v) << L'\n';
         }
@@ -236,7 +246,9 @@ int main()
 		AddPSObjectArguments(powershell2, invoke.objects, invoke.count);
 		AddArgument(powershell2, L"String to end");
 
+        globalPowershell = &powershell2;
 		Invoker invoke2(powershell2);
+        globalPowershell = nullptr;
     }
     DeletePowershell(powershell);
 

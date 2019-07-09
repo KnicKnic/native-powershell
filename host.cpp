@@ -174,6 +174,15 @@ PowershellHandle CreatePowershell(RunspaceHandle handle)
 	powershell->Runspace = runspaceHolder->runspace;
 	return HandleTable::InsertPowershell(powershellHolder);
 }
+PowershellHandle CreatePowershellNested(PowershellHandle handle)
+{   
+    auto parentPowershell = HandleTable::GetPowershell(handle);
+    auto powershell = parentPowershell->powershell->CreateNestedPowerShell();
+    auto powershellHolder = gcnew PowerShellHolder(parentPowershell->runspace, powershell);
+    powershell->Runspace = parentPowershell->runspace->runspace;
+    return HandleTable::InsertPowershell(powershellHolder);
+}
+
 
 
 void DeletePowershell(PowershellHandle handle)
