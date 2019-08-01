@@ -2,3 +2,4 @@
 x64/**
 .vscode/*
 test/x64/**
+test_unit/x64/**

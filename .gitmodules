@@ -1,3 +1,6 @@
 [submodule "native-powershell-bin"]
 	path = native-powershell-bin
 	url = https://github.com/KnicKnic/native-powershell-bin.git
+[submodule "test_unit/Catch2"]
+	path = test_unit/Catch2
+	url = https://github.com/catchorg/Catch2
