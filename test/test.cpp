@@ -4,7 +4,9 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
-#include "../host.h"
+#include "host.h"
+#include "utils/macros.h"
+#include "utils/zero_resetable.hpp"
 
 using namespace std;
 
@@ -35,45 +37,6 @@ struct SomeContext {
         free((void *)ptr);
     }
 
-template<typename T>
-class ZeroResetable {
-	T var;
-public:
-	ZeroResetable() : var(T{ 0 }) {}
-	ZeroResetable(ZeroResetable&& rhs) : var(rhs.var) {
-		rhs.var = T{ 0 };
-	}
-	ZeroResetable& operator=(ZeroResetable&& rhs) {
-		var = rhs.var;
-		rhs.var = T{ 0 };
-		return *this;
-	}
-	ZeroResetable& operator=(T& rhs) {
-		var = rhs;
-		return *this;
-	}
-	ZeroResetable& operator=(T&& rhs) {
-		var = rhs;
-		return *this;
-	}
-	~ZeroResetable() {
-		var = T{ 0 };
-	}
-	operator T& () { return var; }
-	operator const T& ()const { return var; }
-	T& get() { return var; }
-	template<typename Y>
-	auto operator[](Y i) {
-		return var[i];
-	}
-	T* operator->() { return &var; }
-	auto operator*() { return *var; }
-	T* operator&() { return &var; }
-	const bool operator!=(T t) const{ return var != t; }
-};
-
-#define DENY_COPY(T) T(T&)=delete ; T& operator=(T&) = delete;
-#define DEFAULT_MOVE(T) T(T&&)=default; T& operator=(T&&) = default;
 
 class Invoker {
 public:
@@ -82,7 +45,6 @@ public:
     }
 	DENY_COPY(Invoker);
 	DEFAULT_MOVE(Invoker);
-	//Invoker(Invoker&) = delete; Invoker& operator=(Invoker&) = delete;
     ~Invoker() {
         for (unsigned int i = 0; i < count; ++i) {
             ClosePowerShellObject(objects[i]);

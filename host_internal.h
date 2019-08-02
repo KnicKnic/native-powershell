@@ -6,6 +6,8 @@
 
 #include "host.h"
 #include "logger.h"
+#include "utils/zero_resetable.hpp"
+#include "utils/macros.h"
 #include <string>
 #include <gcroot.h>
 
@@ -24,25 +26,15 @@ struct FreePointerHelper {
 
 template<typename T>
 struct AutoDllFree {
-    T * t;
-    AutoDllFree(const AutoDllFree& obj) = delete;
-    AutoDllFree(T * tParam) :t(tParam) {}
+    ZeroResetable<T*> t;
+    DENY_COPY(AutoDllFree);
+    DEFAULT_MOVE(AutoDllFree);
+    AutoDllFree(T* tParam) { t = tParam; }
     AutoDllFree() :t(nullptr) {}
-    AutoDllFree(AutoDllFree&& rhs)
-    {
-        t = rhs.t;
-        rhs.t = nullptr;
-    }
-    AutoDllFree& operator=(AutoDllFree&& p)
-    {
-        t = rhs.t;
-        rhs.t = nullptr;
-    }
-    AutoDllFree& operator=(AutoDllFree& obj) = delete;
     void free() {
 
         if (t!=nullptr) {
-            FreePointerPtr((void*)t);
+            FreePointerPtr((void*)t.get());
             t = nullptr;
         }
 

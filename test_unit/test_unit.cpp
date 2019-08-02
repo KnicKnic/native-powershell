@@ -8,7 +8,10 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
-#include "../host.h"
+#include <optional>
+#include "host.h"
+#include "utils/macros.h"
+#include "utils/zero_resetable.hpp"
 
 //#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #define CATCH_CONFIG_RUNNER // creating own main to do powershell native init
@@ -37,53 +40,13 @@ struct SomeContext {
     std::wstring LoggerContext;
     std::wstring CommandContext;
     RunspaceHandle runspace;
-    PowershellHandle *powershell = nullptr;
+    std::optional<PowershellHandle> powershell;
 };
 
 template<typename T>
 void FreeFunction(T* ptr) {
     free((void*)ptr);
 }
-
-template<typename T>
-class ZeroResetable {
-    T var;
-public:
-    ZeroResetable() : var(T{ 0 }) {}
-    ZeroResetable(ZeroResetable&& rhs) : var(rhs.var) {
-        rhs.var = T{ 0 };
-    }
-    ZeroResetable& operator=(ZeroResetable&& rhs) {
-        var = rhs.var;
-        rhs.var = T{ 0 };
-        return *this;
-    }
-    ZeroResetable& operator=(T& rhs) {
-        var = rhs;
-        return *this;
-    }
-    ZeroResetable& operator=(T&& rhs) {
-        var = rhs;
-        return *this;
-    }
-    ~ZeroResetable() {
-        var = T{ 0 };
-    }
-    operator T& () { return var; }
-    operator const T& ()const { return var; }
-    T& get() { return var; }
-    template<typename Y>
-    auto operator[](Y i) {
-        return var[i];
-    }
-    T* operator->() { return &var; }
-    auto operator*() { return *var; }
-    T* operator&() { return &var; }
-    const bool operator!=(T t) const { return var != t; }
-};
-
-#define DENY_COPY(T) T(T&)=delete ; T& operator=(T&) = delete;
-#define DEFAULT_MOVE(T) T(T&&)=default; T& operator=(T&&) = default;
 
 class Invoker {
 public:
@@ -92,10 +55,11 @@ public:
     }
     DENY_COPY(Invoker);
     DEFAULT_MOVE(Invoker);
-    //Invoker(Invoker&) = delete; Invoker& operator=(Invoker&) = delete;
     ~Invoker() {
         for (unsigned int i = 0; i < count; ++i) {
-            ClosePowerShellObject(objects[i]);
+            if (objectsToNotClose.size() == 0 || !objectsToNotClose[i]) {
+                ClosePowerShellObject(objects[i]);
+            }
         }
         if (objects != nullptr) {
             free(objects);
@@ -112,8 +76,15 @@ public:
     PowerShellObject* results() {
         return objects;
     }
+    void DoNotCloseIndex(unsigned int i) {
+        if (objectsToNotClose.size() == 0) {
+            objectsToNotClose.resize(count, false);
+        }
+        objectsToNotClose[i] = true;
+    }
     ZeroResetable< PowerShellObject*> objects;
     ZeroResetable< unsigned int> count;
+    vector<bool> objectsToNotClose;
     ZeroResetable< PowerShellObject> exception;
 private:
 };
@@ -139,10 +110,10 @@ std::wstring GetToString(PowerShellObject handle) {
 
 }
 
-Invoker RunScript(RunspaceHandle & runspace, PowershellHandle * parent, std::wstring command, bool useLocalScope, const std::vector<std::wstring> & elems) {
+Invoker RunScript(RunspaceHandle & runspace, std::optional<PowershellHandle> parent, std::wstring command, bool useLocalScope, const std::vector<std::wstring> & elems) {
 
     PowershellHandle powershell;
-    if (parent != nullptr) {
+    if (parent) {
         powershell = CreatePowershellNested(*parent);
     }
     else {
@@ -157,13 +128,13 @@ Invoker RunScript(RunspaceHandle & runspace, PowershellHandle * parent, std::wst
     DeletePowershell(powershell);
     return results;
 }
-Invoker RunScript(RunspaceHandle & runspace, PowershellHandle * parent, std::wstring command, bool useLocalScope, const std::wstring & elems) {
+Invoker RunScript(RunspaceHandle & runspace, std::optional<PowershellHandle> parent, std::wstring command, bool useLocalScope, const std::wstring & elems) {
     return RunScript(runspace, parent, command, useLocalScope, std::vector<std::wstring>({ elems }));
 }
-Invoker RunScript(RunspaceHandle & runspace, PowershellHandle * parent, std::wstring command, bool useLocalScope) {
+Invoker RunScript(RunspaceHandle & runspace, std::optional<PowershellHandle> parent, std::wstring command, bool useLocalScope) {
     return RunScript(runspace, parent, command, useLocalScope, std::vector<std::wstring>({  }));
 }
-Invoker RunScript(RunspaceHandle & runspace, PowershellHandle * parent, std::wstring command, bool useLocalScope, const std::wstring & elem1, const std::wstring & elem2) {
+Invoker RunScript(RunspaceHandle & runspace, std::optional<PowershellHandle> parent, std::wstring command, bool useLocalScope, const std::wstring & elem1, const std::wstring & elem2) {
     return RunScript(runspace, parent, command, useLocalScope, std::vector<std::wstring>({ elem1, elem2 }));
 }
 
@@ -236,9 +207,38 @@ TEST_CASE("validate context") {
     REQUIRE(validateContext_validatedCallback);
 }
 TEST_CASE("nested runspace"){
-    SomeContext context{ L"MyLoggerContext: ", L"MyCommandContext: " };
-    auto runspace = CreateRunspace(&context, Command, Logger);
+        struct SomeContext2 {
+            bool logged;
+            RunspaceHandle runspace;
+            PowershellHandle powershell;
+        }; 
+        auto logger = +[](void* context, const wchar_t* s) {((SomeContext2*)context)->logged = true; };
+
+    auto command = +[](void* context, const wchar_t* s, PowerShellObject * input, unsigned long long inputCount, JsonReturnValues * returnValues)
+    {
+        auto realContext = (SomeContext2*)context;
+        REQUIRE(realContext->logged == false);
+        RunScript(realContext->runspace, realContext->powershell, L"write-host 15", true);
+
+        REQUIRE(realContext->logged);
+
+        return;
+    };
+    SomeContext2 context{ false };
+    auto runspace = CreateRunspace(&context, command, logger);
     context.runspace = runspace;
+    REQUIRE(context.runspace != 0);
+
+    auto powershell = CreatePowershell(runspace);
+    REQUIRE(powershell != 0);
+    context.powershell = powershell;
+
+    AddScriptSpecifyScope(powershell, L"send-hostcommand -message \"hi\"  ", FALSE);
+    auto results = Invoker(powershell);
+    REQUIRE(context.logged);
+    REQUIRE(results.count == 0);
+
+    DeletePowershell(powershell);
 }
 
 
@@ -247,7 +247,7 @@ TEST_CASE("tests", "[native-powershell]")
     SomeContext context{ L"MyLoggerContext: ", L"MyCommandContext: " };
     auto runspace = CreateRunspace(&context, Command, Logger);
     context.runspace = runspace;
-    RunScript(runspace, nullptr, L"[int12", true);
+    RunScript(runspace, nullopt, L"[int12", true);
 
     auto powershell = CreatePowershell(runspace);
     //AddScriptSpecifyScope(powershell, L"c:\\code\\psh_host\\script.ps1", 1);
@@ -279,9 +279,9 @@ TEST_CASE("tests", "[native-powershell]")
         AddPSObjectArguments(powershell2, invoke.objects, invoke.count);
         AddArgument(powershell2, L"String to end");
 
-        context.powershell = &powershell2;
+        context.powershell = powershell2;
         Invoker invoke2(powershell2);
-        context.powershell = nullptr;
+        context.powershell = nullopt;
     }
     DeletePowershell(powershell);
 
