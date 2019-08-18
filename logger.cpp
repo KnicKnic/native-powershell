@@ -1,7 +1,7 @@
 #include <string>
 #include <msclr\marshal_cppstd.h>
 #include "host.h"
-#include "logger.h"
+#include "logger.hpp"
 
 
 void Logger::LogWrapperAddNewLine(LogString writeLine, Logger::WriteLoggerDelegate^ write, const std::wstring& log) {

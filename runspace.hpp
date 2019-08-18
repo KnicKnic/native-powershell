@@ -1,9 +1,9 @@
 #pragma once
 
 #include "host.h"
-#include "logger.h"
-#include "host_internal.h"
-#include "utils/typed_handles.h"
+#include "logger.hpp"
+#include "host_internal.hpp"
+#include "utils/typed_handles.hpp"
 using namespace System::Management::Automation;
 using namespace System::Management::Automation::Host;
 using namespace System::Management::Automation::Runspaces;

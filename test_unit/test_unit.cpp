@@ -10,7 +10,7 @@
 #include <vector>
 #include <optional>
 #include "host.h"
-#include "utils/macros.h"
+#include "utils/macros.hpp"
 #include "utils/zero_resetable.hpp"
 
 //#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file

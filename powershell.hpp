@@ -1,8 +1,8 @@
 #pragma once
 #pragma once
 #include "host.h"
-#include "logger.h"
-#include "runspace.h"
+#include "logger.hpp"
+#include "runspace.hpp"
 using namespace System::Management::Automation;
 using namespace System::Management::Automation::Host;
 using namespace System::Management::Automation::Runspaces;

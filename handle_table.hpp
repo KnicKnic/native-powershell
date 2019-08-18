@@ -1,8 +1,8 @@
 #pragma once
 #include "host.h"
-#include "runspace.h"
-#include "powershell.h"
-#include "utils/typed_handles.h"
+#include "runspace.hpp"
+#include "powershell.hpp"
+#include "utils/typed_handles.hpp"
 
 ref class HandleTable {
 

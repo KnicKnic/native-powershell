@@ -35,31 +35,31 @@
     <ClInclude Include="host.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="my_host.h">
+    <ClInclude Include="my_host.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="runspace.h">
+    <ClInclude Include="runspace.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="logger.h">
+    <ClInclude Include="logger.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="powershell.h">
+    <ClInclude Include="powershell.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="host_internal.h">
+    <ClInclude Include="host_internal.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="handle_table.h">
+    <ClInclude Include="handle_table.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="utils\macros.h">
+    <ClInclude Include="utils\macros.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="utils\zero_resetable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="utils\typed_handles.h">
+    <ClInclude Include="utils\typed_handles.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

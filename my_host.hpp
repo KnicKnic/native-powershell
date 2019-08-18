@@ -1,6 +1,6 @@
 #pragma once
-#include "runspace.h"
-#include "logger.h"
+#include "runspace.hpp"
+#include "logger.hpp"
 
 ref class MyRawUserInterface : PSHostRawUserInterface {
     // Inherited via PSHostRawUserInterface

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utils/macros.h"
+#include "utils/macros.hpp"
 #include "utils/zero_resetable.hpp"
 
 extern FreePointer FreePointerPtr;

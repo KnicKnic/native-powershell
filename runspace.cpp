@@ -1,4 +1,4 @@
-#include "runspace.h"
+#include "runspace.hpp"
 
 
 using namespace System::Management::Automation::Runspaces;
@@ -12,7 +12,7 @@ using namespace System::Management::Automation;
 using namespace System::Management::Automation::Host;
 
 
-#include "my_host.h"
+#include "my_host.hpp"
 
 RunspaceHolder::~RunspaceHolder() {
     delete runspace;

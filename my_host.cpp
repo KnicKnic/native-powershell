@@ -6,8 +6,8 @@
   using namespace System::Globalization;
   using namespace System::Management::Automation;
   using namespace System::Management::Automation::Host;
-#include "my_host.h"
-#include "host_internal.h"
+#include "my_host.hpp"
+#include "host_internal.hpp"
 
 
   inline void MyHostUserInterface::Write(System::String^ value)

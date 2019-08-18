@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <vector>
 #include "host.h"
-#include "utils/macros.h"
+#include "utils/macros.hpp"
 #include "utils/zero_resetable.hpp"
 
 using namespace std;

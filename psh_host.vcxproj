@@ -135,15 +135,15 @@
     <ClCompile Include="runspace.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="handle_table.h" />
+    <ClInclude Include="handle_table.hpp" />
     <ClInclude Include="host.h" />
-    <ClInclude Include="host_internal.h" />
-    <ClInclude Include="logger.h" />
-    <ClInclude Include="my_host.h" />
-    <ClInclude Include="powershell.h" />
-    <ClInclude Include="runspace.h" />
-    <ClInclude Include="utils\macros.h" />
-    <ClInclude Include="utils\typed_handles.h" />
+    <ClInclude Include="host_internal.hpp" />
+    <ClInclude Include="logger.hpp" />
+    <ClInclude Include="my_host.hpp" />
+    <ClInclude Include="powershell.hpp" />
+    <ClInclude Include="runspace.hpp" />
+    <ClInclude Include="utils\macros.hpp" />
+    <ClInclude Include="utils\typed_handles.hpp" />
     <ClInclude Include="utils\zero_resetable.hpp" />
   </ItemGroup>
   <ItemGroup>

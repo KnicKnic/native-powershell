@@ -16,14 +16,14 @@ using namespace System::Collections::Generic;
 using namespace System::Globalization;
 using namespace System::Management::Automation;
 using namespace System::Management::Automation::Host;
-#include "my_host.h"
+#include "my_host.hpp"
 #include "utils/memory_helpers.hpp"
 #include "utils/managed_memory_helpers.hpp"
-#include "runspace.h"
-#include "powershell.h"
-#include "handle_table.h"
+#include "runspace.hpp"
+#include "powershell.hpp"
+#include "handle_table.hpp"
 
-#include "logger.h"
+#include "logger.hpp"
 
 // Globals
 FreePointer FreePointerPtr = nullptr;
