@@ -10,11 +10,11 @@ using namespace System::Management::Automation::Runspaces;
 ref class RunspaceHolder {
 public:
     Runspace^ runspace;
-    ReceiveJsonCommand sendJsonCommand;
+    NativePowerShell_ReceiveJsonCommand sendJsonCommand;
     Logger^ logger;
     MyHost^ host;
     void* context;
-    RunspaceHolder(void * contextParam, ReceiveJsonCommand jsonCommand, Logger^ loggerParam)  
+    RunspaceHolder(void * contextParam, NativePowerShell_ReceiveJsonCommand jsonCommand, Logger^ loggerParam)  
         : sendJsonCommand(jsonCommand)
         , logger(loggerParam)
         , context(contextParam)

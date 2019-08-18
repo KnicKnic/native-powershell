@@ -7,17 +7,17 @@
 ref class HandleTable {
 
 private:
-    static TypedConcurrentTable<PowerShellObject, PSObject^>^ psObjects = gcnew TypedConcurrentTable<PowerShellObject, PSObject^>();
-        static TypedConcurrentTable<RunspaceHandle, RunspaceHolder^>^ runspaces = gcnew TypedConcurrentTable<RunspaceHandle, RunspaceHolder^>();
-    static TypedConcurrentTable<PowershellHandle, PowerShellHolder^>^ powershells = gcnew TypedConcurrentTable<PowershellHandle, PowerShellHolder^>();
+    static TypedConcurrentTable<NativePowerShell_PowerShellObject, PSObject^>^ psObjects = gcnew TypedConcurrentTable<NativePowerShell_PowerShellObject, PSObject^>();
+        static TypedConcurrentTable<NativePowerShell_RunspaceHandle, RunspaceHolder^>^ runspaces = gcnew TypedConcurrentTable<NativePowerShell_RunspaceHandle, RunspaceHolder^>();
+    static TypedConcurrentTable<NativePowerShell_PowerShellHandle, PowerShellHolder^>^ powershells = gcnew TypedConcurrentTable<NativePowerShell_PowerShellHandle, PowerShellHolder^>();
 public:
-    static RunspaceHandle InsertRunspace(RunspaceHolder^ runspace);
-    static RunspaceHolder^ GetRunspace(RunspaceHandle handle);
-    static RunspaceHolder^ RemoveRunspace(RunspaceHandle handle);
-    static PowershellHandle InsertPowershell(PowerShellHolder^ powershell);
-    static PowerShellHolder^ GetPowershell(PowershellHandle handle);
-    static PowerShellHolder^ RemovePowershell(PowershellHandle handle);
-    static PowerShellObject InsertPSObject(PSObject^ object);
-    static PSObject^ GetPSObject(PowerShellObject handle);
-    static PSObject^ RemovePSObject(PowerShellObject handle);
+    static NativePowerShell_RunspaceHandle InsertRunspace(RunspaceHolder^ runspace);
+    static RunspaceHolder^ GetRunspace(NativePowerShell_RunspaceHandle handle);
+    static RunspaceHolder^ RemoveRunspace(NativePowerShell_RunspaceHandle handle);
+    static NativePowerShell_PowerShellHandle InsertPowershell(PowerShellHolder^ powershell);
+    static PowerShellHolder^ GetPowershell(NativePowerShell_PowerShellHandle handle);
+    static PowerShellHolder^ RemovePowershell(NativePowerShell_PowerShellHandle handle);
+    static NativePowerShell_PowerShellObject InsertPSObject(PSObject^ object);
+    static PSObject^ GetPSObject(NativePowerShell_PowerShellObject handle);
+    static PSObject^ RemovePSObject(NativePowerShell_PowerShellObject handle);
 };

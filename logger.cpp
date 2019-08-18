@@ -4,7 +4,7 @@
 #include "logger.hpp"
 
 
-void Logger::LogWrapperAddNewLine(LogString writeLine, Logger::WriteLoggerDelegate^ write, const std::wstring& log) {
+void Logger::LogWrapperAddNewLine(NativePowerShell_LogString writeLine, Logger::WriteLoggerDelegate^ write, const std::wstring& log) {
     if (writeLine == nullptr) {
         std::wstring message = log + L'\n';
         write(message);
@@ -14,7 +14,7 @@ void Logger::LogWrapperAddNewLine(LogString writeLine, Logger::WriteLoggerDelega
     }
 }
 
-void Logger::LogWrapper(LogString func, LPCWSTR prepend, const std::wstring& log) {
+void Logger::LogWrapper(NativePowerShell_LogString func, LPCWSTR prepend, const std::wstring& log) {
     if (func == nullptr) {
         std::wstring message;
         if (prepend != nullptr)

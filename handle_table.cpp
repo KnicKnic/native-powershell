@@ -5,38 +5,38 @@
 runspaces = ;
 }*/
 
-inline RunspaceHandle HandleTable::InsertRunspace(RunspaceHolder^ runspace) {
+inline NativePowerShell_RunspaceHandle HandleTable::InsertRunspace(RunspaceHolder^ runspace) {
     return runspaces->insert(runspace);
 }
 
-inline RunspaceHolder^ HandleTable::GetRunspace(RunspaceHandle handle) {
+inline RunspaceHolder^ HandleTable::GetRunspace(NativePowerShell_RunspaceHandle handle) {
     return runspaces->get(handle);
 }
 
-inline RunspaceHolder^ HandleTable::RemoveRunspace(RunspaceHandle handle) {
+inline RunspaceHolder^ HandleTable::RemoveRunspace(NativePowerShell_RunspaceHandle handle) {
     return runspaces->remove(handle);
 }
 
-inline PowershellHandle HandleTable::InsertPowershell(PowerShellHolder^ powershell) {
+inline NativePowerShell_PowerShellHandle HandleTable::InsertPowershell(PowerShellHolder^ powershell) {
     return powershells->insert(powershell);
 }
 
-inline PowerShellHolder^ HandleTable::GetPowershell(PowershellHandle handle) {
+inline PowerShellHolder^ HandleTable::GetPowershell(NativePowerShell_PowerShellHandle handle) {
     return powershells->get(handle);
 }
 
-inline PowerShellHolder^ HandleTable::RemovePowershell(PowershellHandle handle) {
+inline PowerShellHolder^ HandleTable::RemovePowershell(NativePowerShell_PowerShellHandle handle) {
     return powershells->remove(handle);
 }
 
 
 
-inline PowerShellObject HandleTable::InsertPSObject(PSObject^ object) {
+inline NativePowerShell_PowerShellObject HandleTable::InsertPSObject(PSObject^ object) {
     return psObjects->insert(object);
 }
-inline PSObject^ HandleTable::GetPSObject(PowerShellObject handle) {
+inline PSObject^ HandleTable::GetPSObject(NativePowerShell_PowerShellObject handle) {
     return psObjects->get(handle);
 }
-inline PSObject^ HandleTable::RemovePSObject(PowerShellObject handle) {
+inline PSObject^ HandleTable::RemovePSObject(NativePowerShell_PowerShellObject handle) {
     return psObjects->get(handle);
 }

@@ -6,7 +6,7 @@
 #include <string>
 ref class Logger {
 public:
-    Logger(void * contextParam, LogString WriteFunc) : BaseLogString(WriteFunc), context(contextParam) {
+    Logger(void * contextParam, NativePowerShell_LogString WriteFunc) : BaseLogString(WriteFunc), context(contextParam) {
         LogWarningDelegate = gcnew WriteLoggerDelegate(this, &Logger::LogWarning);
         LogInformationDelegate = gcnew WriteLoggerDelegate(this, &Logger::LogInformation);
         LogVerboseDelegate = gcnew WriteLoggerDelegate(this, &Logger::LogVerbose);
@@ -14,19 +14,19 @@ public:
         LogErrorDelegate = gcnew WriteLoggerDelegate(this, &Logger::LogError);
         LogDelegate = gcnew WriteLoggerDelegate(this, &Logger::Log);
     };
-    LogString BaseLogString = nullptr;
-    LogString LogWarningPtr = nullptr;
-    LogString LogInformationPtr = nullptr;
-    LogString LogVerbosePtr = nullptr;
-    LogString LogDebugPtr = nullptr;
-    LogString LogErrorPtr = nullptr;
+    NativePowerShell_LogString BaseLogString = nullptr;
+    NativePowerShell_LogString LogWarningPtr = nullptr;
+    NativePowerShell_LogString LogInformationPtr = nullptr;
+    NativePowerShell_LogString LogVerbosePtr = nullptr;
+    NativePowerShell_LogString LogDebugPtr = nullptr;
+    NativePowerShell_LogString LogErrorPtr = nullptr;
 
-    LogString BaseLogLinePtr = nullptr;
-    LogString LogWarningLinePtr = nullptr;
-    LogString LogInformationLinePtr = nullptr;
-    LogString LogVerboseLinePtr = nullptr;
-    LogString LogDebugLinePtr = nullptr;
-    LogString LogErrorLinePtr = nullptr;
+    NativePowerShell_LogString BaseLogLinePtr = nullptr;
+    NativePowerShell_LogString LogWarningLinePtr = nullptr;
+    NativePowerShell_LogString LogInformationLinePtr = nullptr;
+    NativePowerShell_LogString LogVerboseLinePtr = nullptr;
+    NativePowerShell_LogString LogDebugLinePtr = nullptr;
+    NativePowerShell_LogString LogErrorLinePtr = nullptr;
 
     void LogWarning(const std::wstring& log);
     void LogInformation(const std::wstring& log);
@@ -67,8 +67,8 @@ private:
     WriteLoggerDelegate^ LogErrorDelegate;
     WriteLoggerDelegate^ LogDelegate;
 
-    void LogWrapperAddNewLine(LogString writeLine, WriteLoggerDelegate^ write, const std::wstring& log);
-    //__inline void LogWrapperAddNewLine(LogString writeLine, void (Logger::* write)(const std::wstring&), const std::wstring& log) {
+    void LogWrapperAddNewLine(NativePowerShell_LogString writeLine, WriteLoggerDelegate^ write, const std::wstring& log);
+    //__inline void LogWrapperAddNewLine(NativePowerShell_LogString writeLine, void (Logger::* write)(const std::wstring&), const std::wstring& log) {
     //    if (writeLine == nullptr) {
     //        std::wstring message = log + L'\n';
     //        (this->*write)(message);
@@ -78,8 +78,8 @@ private:
     //    }
     //}
 
-    void LogWrapper(LogString func, LPCWSTR prepend, const std::wstring& log);
-    /*__inline void LogWrapper(LogString func, LPCWSTR prepend, const std::wstring& log) {
+    void LogWrapper(NativePowerShell_LogString func, LPCWSTR prepend, const std::wstring& log);
+    /*__inline void LogWrapper(NativePowerShell_LogString func, LPCWSTR prepend, const std::wstring& log) {
         if (func == nullptr) {
             std::wstring message;
             if (prepend != nullptr)

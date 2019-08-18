@@ -3,13 +3,13 @@
 #include "utils/macros.hpp"
 #include "utils/zero_resetable.hpp"
 
-extern FreePointer FreePointerPtr;
-extern AllocPointer AllocPointerPtr;
+extern NativePowerShell_FreePointer NativePowerShell_FreePointerPtr;
+extern NativePowerShell_AllocPointer NativePowerShell_AllocPointerPtr;
 
-struct FreePointerHelper {
+struct NativePowerShell_FreePointerHelper {
     template<typename T>
     void operator()(T* t) {
-        FreePointerPtr((void*)t);
+        NativePowerShell_FreePointerPtr((void*)t);
     }
 };
 
@@ -23,7 +23,7 @@ struct AutoDllFree {
     void free() {
 
         if (t!=nullptr) {
-            FreePointerPtr((void*)t.get());
+            NativePowerShell_FreePointerPtr((void*)t.get());
             t = nullptr;
         }
 
