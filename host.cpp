@@ -17,7 +17,8 @@ using namespace System::Globalization;
 using namespace System::Management::Automation;
 using namespace System::Management::Automation::Host;
 #include "my_host.h"
-#include "host_internal.h"
+#include "utils/memory_helpers.hpp"
+#include "utils/managed_memory_helpers.hpp"
 #include "runspace.h"
 #include "powershell.h"
 #include "handle_table.h"

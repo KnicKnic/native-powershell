@@ -142,7 +142,9 @@
     <ClInclude Include="my_host.h" />
     <ClInclude Include="powershell.h" />
     <ClInclude Include="runspace.h" />
-    <ClInclude Include="typed_handles.h" />
+    <ClInclude Include="utils\macros.h" />
+    <ClInclude Include="utils\typed_handles.h" />
+    <ClInclude Include="utils\zero_resetable.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Core" />

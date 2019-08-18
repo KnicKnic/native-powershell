@@ -3,7 +3,7 @@
 #include "host.h"
 #include "logger.h"
 #include "host_internal.h"
-#include "typed_handles.h"
+#include "utils/typed_handles.h"
 using namespace System::Management::Automation;
 using namespace System::Management::Automation::Host;
 using namespace System::Management::Automation::Runspaces;

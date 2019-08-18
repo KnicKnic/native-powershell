@@ -2,7 +2,7 @@
 #include "host.h"
 #include "runspace.h"
 #include "powershell.h"
-#include "typed_handles.h"
+#include "utils/typed_handles.h"
 
 ref class HandleTable {
 

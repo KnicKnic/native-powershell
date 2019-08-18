@@ -53,7 +53,13 @@
     <ClInclude Include="handle_table.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="typed_handles.h">
+    <ClInclude Include="utils\macros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\zero_resetable.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\typed_handles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
