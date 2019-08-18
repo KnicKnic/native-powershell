@@ -32,24 +32,24 @@ NativePowerShell_AllocPointer NativePowerShell_AllocPointerPtr = nullptr;
 const NativePowerShell_PowerShellObject EmptyNativePowerShell_PowerShellObjectHandle = (NativePowerShell_PowerShellObject)(0);
 
 
-void InitLibrary(NativePowerShell_AllocPointer allocPtr, NativePowerShell_FreePointer freePtr) {
+void NativePowerShell_InitLibrary(NativePowerShell_AllocPointer allocPtr, NativePowerShell_FreePointer freePtr) {
     NativePowerShell_AllocPointerPtr = allocPtr;
     NativePowerShell_FreePointerPtr = freePtr;
 }
 
 
-long AddCommandSpecifyScope(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr command,char useLocalScope)
+long NativePowerShell_AddCommandSpecifyScope(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr command,char useLocalScope)
 {
     auto managedCommand = msclr::interop::marshal_as<System::String^>(command);
     auto powershell = HandleTable::GetPowershell(handle)->powershell;
     powershell->AddCommand(managedCommand, useLocalScope !=0);
     return 0;
 }
-long AddCommand(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr command)
+long NativePowerShell_AddCommand(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr command)
 {
-    return AddCommandSpecifyScope(handle, command, char(1));
+    return NativePowerShell_AddCommandSpecifyScope(handle, command, char(1));
 }
-long AddArgument(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr argument)
+long NativePowerShell_AddArgument(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr argument)
 {
 	auto managedArgument = msclr::interop::marshal_as<System::String^>(argument);
 	auto powershell = HandleTable::GetPowershell(handle)->powershell;
@@ -57,7 +57,7 @@ long AddArgument(NativePowerShell_PowerShellHandle handle, NativePowerShell_Stri
 	return 0;
 }
 
-long AddParameterString(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr name, NativePowerShell_StringPtr value) {
+long NativePowerShell_AddParameterString(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr name, NativePowerShell_StringPtr value) {
 
     auto paramName = msclr::interop::marshal_as<System::String^>(name);
     auto paramValue = msclr::interop::marshal_as<System::String^>(value);
@@ -67,7 +67,7 @@ long AddParameterString(NativePowerShell_PowerShellHandle handle, NativePowerShe
 }
 
 
-long AddParameterObject(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr name, NativePowerShell_PowerShellObject object) {
+long NativePowerShell_AddParameterObject(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr name, NativePowerShell_PowerShellObject object) {
 
     auto paramName = msclr::interop::marshal_as<System::String^>(name);
     auto powershell = HandleTable::GetPowershell(handle)->powershell;
@@ -87,7 +87,7 @@ long AddParameterObject(NativePowerShell_PowerShellHandle handle, NativePowerShe
     return 0;
 }
 
-long AddPSObjectArgument(NativePowerShell_PowerShellHandle handle, NativePowerShell_PowerShellObject object)
+long NativePowerShell_AddPSObjectArgument(NativePowerShell_PowerShellHandle handle, NativePowerShell_PowerShellObject object)
 {
 	PSObject^ psObject = HandleTable::GetPSObject(object);
 	auto powershell = HandleTable::GetPowershell(handle)->powershell;
@@ -100,18 +100,18 @@ long AddPSObjectArgument(NativePowerShell_PowerShellHandle handle, NativePowerSh
     }
 	return 0;
 }
-long AddPSObjectArguments(NativePowerShell_PowerShellHandle handle, NativePowerShell_PowerShellObject* objects, unsigned int count)
+long NativePowerShell_AddPSObjectArguments(NativePowerShell_PowerShellHandle handle, NativePowerShell_PowerShellObject* objects, unsigned int count)
 {
 	for (unsigned int i = 0; i < count; ++i) {
-		AddPSObjectArgument(handle, objects[i]);
+        NativePowerShell_AddPSObjectArgument(handle, objects[i]);
 	}
 	return 0;
 }
 
-long AddScript(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr path) {
-    return AddScriptSpecifyScope(handle, path, char(1));
+long NativePowerShell_AddScript(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr path) {
+    return NativePowerShell_AddScriptSpecifyScope(handle, path, char(1));
 }
-long AddScriptSpecifyScope(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr path, char useLocalScope) 
+long NativePowerShell_AddScriptSpecifyScope(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr path, char useLocalScope)
 {
     auto managedPath = msclr::interop::marshal_as<System::String^>(path);
     auto powershellHolder = HandleTable::GetPowershell(handle);
@@ -119,7 +119,7 @@ long AddScriptSpecifyScope(NativePowerShell_PowerShellHandle handle, NativePower
     powershell->AddScript(managedPath, useLocalScope!=0);
     return 0;
 }
-NativePowerShell_PowerShellObject InvokeCommand(NativePowerShell_PowerShellHandle handle, NativePowerShell_PowerShellObject **objects, unsigned int * objectCount )
+NativePowerShell_PowerShellObject NativePowerShell_InvokeCommand(NativePowerShell_PowerShellHandle handle, NativePowerShell_PowerShellObject **objects, unsigned int * objectCount )
 {
 	auto powershellHolder = HandleTable::GetPowershell(handle);
     auto powershell = powershellHolder->powershell;
@@ -161,13 +161,13 @@ NativePowerShell_PowerShellObject InvokeCommand(NativePowerShell_PowerShellHandl
     return EmptyNativePowerShell_PowerShellObjectHandle;
 }
 
-void ClosePowerShellObject(NativePowerShell_PowerShellObject psobject) {
+void NativePowerShell_ClosePowerShellObject(NativePowerShell_PowerShellObject psobject) {
     if (psobject != EmptyNativePowerShell_PowerShellObjectHandle) {
         HandleTable::RemovePSObject(psobject);
     }
 }
 
-NativePowerShell_PowerShellHandle CreatePowershell(NativePowerShell_RunspaceHandle handle)
+NativePowerShell_PowerShellHandle NativePowerShell_CreatePowerShell(NativePowerShell_RunspaceHandle handle)
 {
     auto runspaceHolder = HandleTable::GetRunspace(handle);
 	auto powershell = PowerShell::Create();
@@ -175,7 +175,7 @@ NativePowerShell_PowerShellHandle CreatePowershell(NativePowerShell_RunspaceHand
 	powershell->Runspace = runspaceHolder->runspace;
 	return HandleTable::InsertPowershell(powershellHolder);
 }
-NativePowerShell_PowerShellHandle CreatePowershellNested(NativePowerShell_PowerShellHandle handle)
+NativePowerShell_PowerShellHandle NativePowerShell_CreatePowerShellNested(NativePowerShell_PowerShellHandle handle)
 {   
     auto parentPowershell = HandleTable::GetPowershell(handle);
     auto powershell = parentPowershell->powershell->CreateNestedPowerShell();
@@ -186,7 +186,7 @@ NativePowerShell_PowerShellHandle CreatePowershellNested(NativePowerShell_PowerS
 
 
 
-void DeletePowershell(NativePowerShell_PowerShellHandle handle)
+void NativePowerShell_DeletePowershell(NativePowerShell_PowerShellHandle handle)
 {
     MakeUsing(HandleTable::RemovePowershell(handle))->powershell->Stop();
 }
@@ -334,7 +334,7 @@ void SetISSEV(
 
   throw gcnew System::IndexOutOfRangeException;
 }
-NativePowerShell_RunspaceHandle CreateRunspace(void * context, NativePowerShell_ReceiveJsonCommand receiveJsonCommand, NativePowerShell_LogString BaseLogString)
+NativePowerShell_RunspaceHandle NativePowerShell_CreateRunspace(void * context, NativePowerShell_ReceiveJsonCommand receiveJsonCommand, NativePowerShell_LogString BaseLogString)
 {
     auto iss = InitialSessionState::CreateDefault();
     // Add the get-proc cmdlet to the InitialSessionState object.
@@ -360,7 +360,7 @@ NativePowerShell_RunspaceHandle CreateRunspace(void * context, NativePowerShell_
 }
 
 
-void DeleteRunspace(NativePowerShell_RunspaceHandle handle)
+void NativePowerShell_DeleteRunspace(NativePowerShell_RunspaceHandle handle)
 {
     MakeUsing(HandleTable::RemoveRunspace(handle))->runspace->Close();
 }
@@ -372,15 +372,15 @@ LPCWSTR MakeHostString(System::String^ str) {
     return cStr;
 }
 
-NativePowerShell_StringPtr GetPSObjectType(NativePowerShell_PowerShellObject handle) {
+NativePowerShell_StringPtr NativePowerShell_GetPSObjectType(NativePowerShell_PowerShellObject handle) {
     auto psObject = HandleTable::GetPSObject(handle);
     return MakeHostString(psObject->BaseObject->GetType()->ToString());
 }
-NativePowerShell_StringPtr GetPSObjectToString(NativePowerShell_PowerShellObject handle) {
+NativePowerShell_StringPtr NativePowerShell_GetPSObjectToString(NativePowerShell_PowerShellObject handle) {
     auto psObject = HandleTable::GetPSObject(handle);
     return MakeHostString(psObject->BaseObject->ToString());
 }
-char IsPSObjectNullptr(NativePowerShell_PowerShellObject handle) {
+char NativePowerShell_IsPSObjectNullptr(NativePowerShell_PowerShellObject handle) {
     if (handle == EmptyNativePowerShell_PowerShellObjectHandle) {
         return char(1);
     }
@@ -394,7 +394,7 @@ char IsPSObjectNullptr(NativePowerShell_PowerShellObject handle) {
     return char(0);
 }
 
-NativePowerShell_PowerShellObject AddPSObjectHandle(NativePowerShell_PowerShellObject handle) {
+NativePowerShell_PowerShellObject NativePowerShell_AddPSObjectHandle(NativePowerShell_PowerShellObject handle) {
     return HandleTable::InsertPSObject(HandleTable::GetPSObject(handle));
 }
 

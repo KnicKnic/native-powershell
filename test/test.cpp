@@ -41,19 +41,19 @@ struct SomeContext {
 class Invoker {
 public:
     Invoker(NativePowerShell_PowerShellHandle handle) {
-        exception = InvokeCommand(handle, &objects, &count);
+        exception = NativePowerShell_InvokeCommand(handle, &objects, &count);
     }
 	DENY_COPY(Invoker);
 	DEFAULT_MOVE(Invoker);
     ~Invoker() {
         for (unsigned int i = 0; i < count; ++i) {
-            ClosePowerShellObject(objects[i]);
+            NativePowerShell_ClosePowerShellObject(objects[i]);
         }
         if (objects != nullptr) {
             free(objects);
             count = 0;
         }
-        ClosePowerShellObject(exception);
+        NativePowerShell_ClosePowerShellObject(exception);
     }
     const bool CallFailed() const {
         return exception.operator!=( NativePowerShell_InvalidHandleValue);
@@ -80,13 +80,13 @@ std::wstring CopyAndFree(const wchar_t * cStr) {
 }
 
 std::wstring GetType(NativePowerShell_PowerShellObject handle) {
-    if('\0' == IsPSObjectNullptr(handle))
-        return CopyAndFree(GetPSObjectType(handle));
+    if('\0' == NativePowerShell_IsPSObjectNullptr(handle))
+        return CopyAndFree(NativePowerShell_GetPSObjectType(handle));
     return L"nullptr";
 }
 std::wstring GetToString(NativePowerShell_PowerShellObject handle) {
-    if ('\0' == IsPSObjectNullptr(handle))
-        return CopyAndFree(GetPSObjectToString(handle));
+    if ('\0' == NativePowerShell_IsPSObjectNullptr(handle))
+        return CopyAndFree(NativePowerShell_GetPSObjectToString(handle));
     return L"nullptr";
 
 }
@@ -95,18 +95,18 @@ Invoker RunScript(NativePowerShell_RunspaceHandle& runspace, NativePowerShell_Po
 
     NativePowerShell_PowerShellHandle powershell;
     if (parent != nullptr) {
-        powershell = CreatePowershellNested(*parent);
+        powershell = NativePowerShell_CreatePowerShellNested(*parent);
     }
     else {
-        powershell = CreatePowershell(runspace);
+        powershell = NativePowerShell_CreatePowerShell(runspace);
     }
-    AddScriptSpecifyScope(powershell, command.c_str(), useLocalScope ? 1 : 0);
+    NativePowerShell_AddScriptSpecifyScope(powershell, command.c_str(), useLocalScope ? 1 : 0);
     for (auto& arg : elems) {
-        AddArgument(powershell, arg.c_str());
+        NativePowerShell_AddArgument(powershell, arg.c_str());
     }
     auto results = Invoker(powershell);
 
-    DeletePowershell(powershell);
+    NativePowerShell_DeletePowershell(powershell);
     return results;
 }
 Invoker RunScript(NativePowerShell_RunspaceHandle& runspace, NativePowerShell_PowerShellHandle* parent, std::wstring command, bool useLocalScope, const std::wstring& elems) {
@@ -172,17 +172,17 @@ extern "C" {
 
 int main()
 {
-    InitLibrary(MallocWrapper, free);
+    NativePowerShell_InitLibrary(MallocWrapper, free);
     SomeContext context{ L"MyLoggerContext: ", L"MyCommandContext: " };
-    auto runspace = CreateRunspace(&context, Command, Logger);
+    auto runspace = NativePowerShell_CreateRunspace(&context, Command, Logger);
     globalRunspace = runspace;
     RunScript(runspace, nullptr, L"[int12", true);
 
-    auto powershell = CreatePowershell(runspace);
+    auto powershell = NativePowerShell_CreatePowerShell(runspace);
     //AddScriptSpecifyScope(powershell, L"c:\\code\\psh_host\\script.ps1", 1);
     //AddCommand(powershell, L"c:\\code\\go-net\\t3.ps1");
     //AddScriptSpecifyScope(powershell, L"write-host $pwd", 0);
-    AddScriptSpecifyScope(powershell, L"0;1;$null;dir c:\\", 1);
+    NativePowerShell_AddScriptSpecifyScope(powershell, L"0;1;$null;dir c:\\", 1);
 
 	//AddCommandSpecifyScope(powershell, L"..\\..\\go-net\\t3.ps1", 0);
     //AddScriptSpecifyScope(powershell, L"$a = \"asdf\"", 0);
@@ -195,28 +195,28 @@ int main()
             wcout << L"Got type: " << GetType(invoke[i]) << L"with value: " << GetToString(invoke[i]) << L'\n';
         }
 
-		auto powershell2 = CreatePowershell(runspace);
+		auto powershell2 = NativePowerShell_CreatePowerShell(runspace);
 
 		// note below will write to output, not return objects	
-		AddScriptSpecifyScope(powershell2, 
+        NativePowerShell_AddScriptSpecifyScope(powershell2,
             L"write-host 'about to enumerate directory';"
             L"write-host $args; $len = $args.length; write-host \"arg count $len\";"
             L"$args | ft | out-string | write-host;"
             L"@(1,'asdf',$null,$false) | send-hostcommand -message 'I sent the host a command' | write-host;"
             L"send-hostcommand -message 'I sent the host a command' | write-host", 0);
-		AddArgument(powershell2, L"String to start");
-		AddPSObjectArguments(powershell2, invoke.objects, invoke.count);
-		AddArgument(powershell2, L"String to end");
+        NativePowerShell_AddArgument(powershell2, L"String to start");
+        NativePowerShell_AddPSObjectArguments(powershell2, invoke.objects, invoke.count);
+        NativePowerShell_AddArgument(powershell2, L"String to end");
 
         globalPowershell = &powershell2;
 		Invoker invoke2(powershell2);
         globalPowershell = nullptr;
     }
-    DeletePowershell(powershell);
+    NativePowerShell_DeletePowershell(powershell);
 
-    powershell = CreatePowershell(runspace);
+    powershell = NativePowerShell_CreatePowerShell(runspace);
     //AddScriptSpecifyScope(powershell, L"c:\\code\\psh_host\\script.ps1", 1);
-    AddCommandSpecifyScope(powershell, L"..\\..\\go-net\\t3.ps1", 0);
+    NativePowerShell_AddCommandSpecifyScope(powershell, L"..\\..\\go-net\\t3.ps1", 0);
     //AddScriptSpecifyScope(powershell, L"write-host $a", 0);
 
     //AddCommand(powershell, L"c:\\code\\go-net\\t3.ps1");
@@ -224,9 +224,9 @@ int main()
     {
         Invoker invoke(powershell);
     }
-    DeletePowershell(powershell);
+    NativePowerShell_DeletePowershell(powershell);
 
-    DeleteRunspace(runspace);
+    NativePowerShell_DeleteRunspace(runspace);
     std::cout << "Hello World!\n"; 
 }
 

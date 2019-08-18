@@ -51,21 +51,21 @@ void FreeFunction(T* ptr) {
 class Invoker {
 public:
     Invoker(NativePowerShell_PowerShellHandle handle) {
-        exception = InvokeCommand(handle, &objects, &count);
+        exception = NativePowerShell_InvokeCommand(handle, &objects, &count);
     }
     DENY_COPY(Invoker);
     DEFAULT_MOVE(Invoker);
     ~Invoker() {
         for (unsigned int i = 0; i < count; ++i) {
             if (objectsToNotClose.size() == 0 || !objectsToNotClose[i]) {
-                ClosePowerShellObject(objects[i]);
+                NativePowerShell_ClosePowerShellObject(objects[i]);
             }
         }
         if (objects != nullptr) {
             free(objects);
             count = 0;
         }
-        ClosePowerShellObject(exception);
+        NativePowerShell_ClosePowerShellObject(exception);
     }
     const bool CallFailed() const {
         return exception.operator!=(NativePowerShell_InvalidHandleValue);
@@ -99,13 +99,13 @@ std::wstring CopyAndFree(const wchar_t* cStr) {
 }
 
 std::wstring GetType(NativePowerShell_PowerShellObject handle) {
-    if ('\0' == IsPSObjectNullptr(handle))
-        return CopyAndFree(GetPSObjectType(handle));
+    if ('\0' == NativePowerShell_IsPSObjectNullptr(handle))
+        return CopyAndFree(NativePowerShell_GetPSObjectType(handle));
     return L"nullptr";
 }
 std::wstring GetToString(NativePowerShell_PowerShellObject handle) {
-    if ('\0' == IsPSObjectNullptr(handle))
-        return CopyAndFree(GetPSObjectToString(handle));
+    if ('\0' == NativePowerShell_IsPSObjectNullptr(handle))
+        return CopyAndFree(NativePowerShell_GetPSObjectToString(handle));
     return L"nullptr";
 
 }
@@ -114,18 +114,18 @@ Invoker RunScript(NativePowerShell_RunspaceHandle & runspace, std::optional<Nati
 
     NativePowerShell_PowerShellHandle powershell;
     if (parent) {
-        powershell = CreatePowershellNested(*parent);
+        powershell = NativePowerShell_CreatePowerShellNested(*parent);
     }
     else {
-        powershell = CreatePowershell(runspace);
+        powershell = NativePowerShell_CreatePowerShell(runspace);
     }
-    AddScriptSpecifyScope(powershell, command.c_str(), useLocalScope ? 1 : 0);
+    NativePowerShell_AddScriptSpecifyScope(powershell, command.c_str(), useLocalScope ? 1 : 0);
     for (auto& arg : elems) {
-        AddArgument(powershell, arg.c_str());
+        NativePowerShell_AddArgument(powershell, arg.c_str());
     }
     auto results = Invoker(powershell);
 
-    DeletePowershell(powershell);
+    NativePowerShell_DeletePowershell(powershell);
     return results;
 }
 Invoker RunScript(NativePowerShell_RunspaceHandle & runspace, std::optional<NativePowerShell_PowerShellHandle> parent, std::wstring command, bool useLocalScope, const std::wstring & elems) {
@@ -196,11 +196,11 @@ TEST_CASE("validate context") {
     auto command = +[](void* context, const wchar_t* s, NativePowerShell_PowerShellObject * input, unsigned long long inputCount, NativePowerShell_JsonReturnValues * returnValues)
         {validateContext_validatedCallback = true;  REQUIRE(context != nullptr); REQUIRE((unsigned long long)context == validateContext_contextValue); };
 
-    auto runspace = CreateRunspace((void *)validateContext_contextValue, command, logger);
+    auto runspace = NativePowerShell_CreateRunspace((void *)validateContext_contextValue, command, logger);
 
-    auto powershell = CreatePowershell(runspace);
+    auto powershell = NativePowerShell_CreatePowerShell(runspace);
 
-    REQUIRE(0 == AddScriptSpecifyScope(powershell, L"write-host 5;send-hostcommand -message \"hi\"  ", FALSE));
+    REQUIRE(0 == NativePowerShell_AddScriptSpecifyScope(powershell, L"write-host 5;send-hostcommand -message \"hi\"  ", FALSE));
     
     Invoker invoke(powershell);
     REQUIRE(validateContext_validatedLogger);
@@ -225,35 +225,35 @@ TEST_CASE("nested runspace"){
         return;
     };
     SomeContext2 context{ false };
-    auto runspace = CreateRunspace(&context, command, logger);
+    auto runspace = NativePowerShell_CreateRunspace(&context, command, logger);
     context.runspace = runspace;
     REQUIRE(context.runspace != 0);
 
-    auto powershell = CreatePowershell(runspace);
+    auto powershell = NativePowerShell_CreatePowerShell(runspace);
     REQUIRE(powershell != 0);
     context.powershell = powershell;
 
-    AddScriptSpecifyScope(powershell, L"send-hostcommand -message \"hi\"  ", FALSE);
+    NativePowerShell_AddScriptSpecifyScope(powershell, L"send-hostcommand -message \"hi\"  ", FALSE);
     auto results = Invoker(powershell);
     REQUIRE(context.logged);
     REQUIRE(results.count == 0);
 
-    DeletePowershell(powershell);
+    NativePowerShell_DeletePowershell(powershell);
 }
 
 
 TEST_CASE("tests", "[native-powershell]")
 {
     SomeContext context{ L"MyLoggerContext: ", L"MyCommandContext: " };
-    auto runspace = CreateRunspace(&context, Command, Logger);
+    auto runspace = NativePowerShell_CreateRunspace(&context, Command, Logger);
     context.runspace = runspace;
     RunScript(runspace, nullopt, L"[int12", true);
 
-    auto powershell = CreatePowershell(runspace);
+    auto powershell = NativePowerShell_CreatePowerShell(runspace);
     //AddScriptSpecifyScope(powershell, L"c:\\code\\psh_host\\script.ps1", 1);
     //AddCommand(powershell, L"c:\\code\\go-net\\t3.ps1");
     //AddScriptSpecifyScope(powershell, L"write-host $pwd", 0);
-    AddScriptSpecifyScope(powershell, L"0;1;$null;dir c:\\", 1);
+    NativePowerShell_AddScriptSpecifyScope(powershell, L"0;1;$null;dir c:\\", 1);
 
     //AddCommandSpecifyScope(powershell, L"..\\..\\go-net\\t3.ps1", 0);
     //AddScriptSpecifyScope(powershell, L"$a = \"asdf\"", 0);
@@ -266,28 +266,28 @@ TEST_CASE("tests", "[native-powershell]")
             wcout << L"Got type: " << GetType(invoke[i]) << L"with value: " << GetToString(invoke[i]) << L'\n';
         }
 
-        auto powershell2 = CreatePowershell(runspace);
+        auto powershell2 = NativePowerShell_CreatePowerShell(runspace);
 
         // note below will write to output, not return objects	
-        AddScriptSpecifyScope(powershell2,
+        NativePowerShell_AddScriptSpecifyScope(powershell2,
             L"write-host 'about to enumerate directory';"
             L"write-host $args; $len = $args.length; write-host \"arg count $len\";"
             L"$args | ft | out-string | write-host;"
             L"@(1,'asdf',$null,$false) | send-hostcommand -message 'I sent the host a command' | write-host;"
             L"send-hostcommand -message 'I sent the host a command' | write-host", 0);
-        AddArgument(powershell2, L"String to start");
-        AddPSObjectArguments(powershell2, invoke.objects, invoke.count);
-        AddArgument(powershell2, L"String to end");
+        NativePowerShell_AddArgument(powershell2, L"String to start");
+        NativePowerShell_AddPSObjectArguments(powershell2, invoke.objects, invoke.count);
+        NativePowerShell_AddArgument(powershell2, L"String to end");
 
         context.powershell = powershell2;
         Invoker invoke2(powershell2);
         context.powershell = nullopt;
     }
-    DeletePowershell(powershell);
+    NativePowerShell_DeletePowershell(powershell);
 
-    powershell = CreatePowershell(runspace);
+    powershell = NativePowerShell_CreatePowerShell(runspace);
     //AddScriptSpecifyScope(powershell, L"c:\\code\\psh_host\\script.ps1", 1);
-    AddCommandSpecifyScope(powershell, L"..\\..\\go-net\\t3.ps1", 0);
+    NativePowerShell_AddCommandSpecifyScope(powershell, L"..\\..\\go-net\\t3.ps1", 0);
     //AddScriptSpecifyScope(powershell, L"write-host $a", 0);
 
     //AddCommand(powershell, L"c:\\code\\go-net\\t3.ps1");
@@ -295,16 +295,16 @@ TEST_CASE("tests", "[native-powershell]")
     {
         Invoker invoke(powershell);
     }
-    DeletePowershell(powershell);
+    NativePowerShell_DeletePowershell(powershell);
 
-    DeleteRunspace(runspace);
+    NativePowerShell_DeleteRunspace(runspace);
     std::cout << "Hello World!\n";
 }
 
 int main(int argc, char* argv[]) {
     // global setup...
 
-    InitLibrary(MallocWrapper, free);
+    NativePowerShell_InitLibrary(MallocWrapper, free);
     int result = Catch::Session().run(argc, argv);
 
     // global clean-up...

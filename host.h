@@ -16,7 +16,7 @@ extern "C" {
     typedef unsigned char* (*NativePowerShell_AllocPointer)(unsigned long long size);
     typedef void (*NativePowerShell_LogString)(void * context, const wchar_t* messages);
 
-    void InitLibrary( NativePowerShell_AllocPointer, NativePowerShell_FreePointer);
+    void NativePowerShell_InitLibrary( NativePowerShell_AllocPointer, NativePowerShell_FreePointer);
 
 	//typedef struct NativePowerShell_RunspaceHandle_ {} *NativePowerShell_RunspaceHandle;
  //   typedef struct NativePowerShell_PowerShellHandle_ {} *NativePowerShell_PowerShellHandle;
@@ -50,37 +50,37 @@ extern "C" {
     }NativePowerShell_JsonReturnValues,*NativePowerShell_PJsonReturnValues;
     typedef void (*NativePowerShell_ReceiveJsonCommand)(void* context, const wchar_t* command, NativePowerShell_PowerShellObject * inputs, unsigned long long inputCount, NativePowerShell_JsonReturnValues* returnValues);
 
-	NativePowerShell_PowerShellHandle CreatePowershell(NativePowerShell_RunspaceHandle handle);
-    NativePowerShell_PowerShellHandle CreatePowershellNested(NativePowerShell_PowerShellHandle handle);
+	NativePowerShell_PowerShellHandle NativePowerShell_CreatePowerShell(NativePowerShell_RunspaceHandle handle);
+    NativePowerShell_PowerShellHandle NativePowerShell_CreatePowerShellNested(NativePowerShell_PowerShellHandle handle);
 
 
-	void DeletePowershell(NativePowerShell_PowerShellHandle handle);
+	void NativePowerShell_DeletePowershell(NativePowerShell_PowerShellHandle handle);
 
 
-	NativePowerShell_RunspaceHandle CreateRunspace(void * context, NativePowerShell_ReceiveJsonCommand, NativePowerShell_LogString );
+	NativePowerShell_RunspaceHandle NativePowerShell_CreateRunspace(void * context, NativePowerShell_ReceiveJsonCommand, NativePowerShell_LogString );
 
-	void DeleteRunspace(NativePowerShell_RunspaceHandle handle);
+	void NativePowerShell_DeleteRunspace(NativePowerShell_RunspaceHandle handle);
 
 
-    long AddCommand(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr command);
-    long AddCommandSpecifyScope(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr command, char useLocalScope);
-    long AddParameterString(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr name, NativePowerShell_StringPtr value);
-    long AddParameterObject(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr name, NativePowerShell_PowerShellObject object);
-	long AddArgument(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr argument);
-	long AddPSObjectArgument(NativePowerShell_PowerShellHandle handle, NativePowerShell_PowerShellObject object);
-	long AddPSObjectArguments(NativePowerShell_PowerShellHandle handle, NativePowerShell_PowerShellObject* objects, unsigned int count);
+    long NativePowerShell_AddCommand(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr command);
+    long NativePowerShell_AddCommandSpecifyScope(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr command, char useLocalScope);
+    long NativePowerShell_AddParameterString(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr name, NativePowerShell_StringPtr value);
+    long NativePowerShell_AddParameterObject(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr name, NativePowerShell_PowerShellObject object);
+	long NativePowerShell_AddArgument(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr argument);
+	long NativePowerShell_AddPSObjectArgument(NativePowerShell_PowerShellHandle handle, NativePowerShell_PowerShellObject object);
+	long NativePowerShell_AddPSObjectArguments(NativePowerShell_PowerShellHandle handle, NativePowerShell_PowerShellObject* objects, unsigned int count);
 
     // caller is responsible for calling ClosePowerShellObject on all returned objects, as well as
     // calling the appropriate free routine on objects assuming it is not nullptr
-    NativePowerShell_PowerShellObject InvokeCommand(NativePowerShell_PowerShellHandle handle, NativePowerShell_PowerShellObject** objects, unsigned int* objectCount);
-    long AddScript(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr path);
-    long AddScriptSpecifyScope(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr path, char useLocalScope);
-    void ClosePowerShellObject(NativePowerShell_PowerShellObject psobject);
+    NativePowerShell_PowerShellObject NativePowerShell_InvokeCommand(NativePowerShell_PowerShellHandle handle, NativePowerShell_PowerShellObject** objects, unsigned int* objectCount);
+    long NativePowerShell_AddScript(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr path);
+    long NativePowerShell_AddScriptSpecifyScope(NativePowerShell_PowerShellHandle handle, NativePowerShell_StringPtr path, char useLocalScope);
+    void NativePowerShell_ClosePowerShellObject(NativePowerShell_PowerShellObject psobject);
 
-    NativePowerShell_StringPtr GetPSObjectType(NativePowerShell_PowerShellObject handle);
-    NativePowerShell_StringPtr GetPSObjectToString(NativePowerShell_PowerShellObject handle);
-    char IsPSObjectNullptr(NativePowerShell_PowerShellObject handle);
-    NativePowerShell_PowerShellObject AddPSObjectHandle(NativePowerShell_PowerShellObject handle);
+    NativePowerShell_StringPtr NativePowerShell_GetPSObjectType(NativePowerShell_PowerShellObject handle);
+    NativePowerShell_StringPtr NativePowerShell_GetPSObjectToString(NativePowerShell_PowerShellObject handle);
+    char NativePowerShell_IsPSObjectNullptr(NativePowerShell_PowerShellObject handle);
+    NativePowerShell_PowerShellObject NativePowerShell_AddPSObjectHandle(NativePowerShell_PowerShellObject handle);
 
 #ifdef __cplusplus
 }

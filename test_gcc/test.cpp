@@ -175,10 +175,10 @@ std::wstring GetToString(NativePowerShell_PowerShellObject handle) {
 
 int main()
 {
-    InitLibrary(MallocWrapper, free);
+    NativePowerShell_InitLibrary(MallocWrapper, free);
     SomeContext context{ L"MyLoggerContext: ", L"MyCommandContext: " };
     auto runspace = CreateRunspace(&context, Command, Logger);
-    auto powershell = CreatePowershell(runspace);
+    auto powershell = NativePowerShell_CreatePowerShell(runspace);
     //AddScriptSpecifyScope(powershell, L"c:\\code\\psh_host\\script.ps1", 1);
     //AddCommand(powershell, L"c:\\code\\go-net\\t3.ps1");
     //AddScriptSpecifyScope(powershell, L"write-host $pwd", 0);
@@ -195,7 +195,7 @@ int main()
             wcout << L"Got type: " << GetType(invoke[i]) << L"with value: " << GetToString(invoke[i]) << L'\n';
         }
 
-		auto powershell2 = CreatePowershell(runspace);
+		auto powershell2 = NativePowerShell_CreatePowerShell(runspace);
 
 		// note below will write to output, not return objects	
 		AddScriptSpecifyScope(powershell2, 
@@ -210,9 +210,9 @@ int main()
 
 		Invoker invoke2(powershell2);
     }
-    DeletePowershell(powershell);
+    NativePowerShell_DeletePowershell(powershell);
 
-    powershell = CreatePowershell(runspace);
+    powershell = NativePowerShell_CreatePowerShell(runspace);
     //AddScriptSpecifyScope(powershell, L"c:\\code\\psh_host\\script.ps1", 1);
     AddCommandSpecifyScope(powershell, L"..\\..\\go-net\\t3.ps1", 0);
     //AddScriptSpecifyScope(powershell, L"write-host $a", 0);
@@ -222,7 +222,7 @@ int main()
     {
         Invoker invoke(powershell);
     }
-    DeletePowershell(powershell);
+    NativePowerShell_DeletePowershell(powershell);
 
     DeleteRunspace(runspace);
     std::cout << "Hello World!\n"; 

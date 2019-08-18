@@ -1,25 +1,25 @@
 EXPORTS
-	CreateRunspace
-	DeleteRunspace
-	CreatePowershell
-	CreatePowershellNested
-	DeletePowershell
-	AddCommand
-	AddParameterString
-	AddArgument
-	InvokeCommand
-	AddScript
-	InitLibrary
-	AddScriptSpecifyScope
-	AddCommandSpecifyScope
-ClosePowerShellObject
-AddPSObjectArgument
-AddPSObjectArguments
-AddParameterObject
+	NativePowerShell_CreateRunspace
+	NativePowerShell_DeleteRunspace
+	NativePowerShell_CreatePowerShell
+	NativePowerShell_CreatePowerShellNested
+	NativePowerShell_DeletePowershell
+	NativePowerShell_AddCommand
+	NativePowerShell_AddParameterString
+	NativePowerShell_AddArgument
+	NativePowerShell_InvokeCommand
+	NativePowerShell_AddScript
+	NativePowerShell_InitLibrary
+	NativePowerShell_AddScriptSpecifyScope
+	NativePowerShell_AddCommandSpecifyScope
+NativePowerShell_ClosePowerShellObject
+NativePowerShell_AddPSObjectArgument
+NativePowerShell_AddPSObjectArguments
+NativePowerShell_AddParameterObject
 
 
-GetPSObjectType
-GetPSObjectToString
-IsPSObjectNullptr
-AddPSObjectHandle
+NativePowerShell_GetPSObjectType
+NativePowerShell_GetPSObjectToString
+NativePowerShell_IsPSObjectNullptr
+NativePowerShell_AddPSObjectHandle
 
