@@ -301,6 +301,71 @@ TEST_CASE("tests", "[native-powershell]")
     std::cout << "Hello World!\n";
 }
 
+//
+//// need to uncomment test
+//// note that send-hostcommand does not work in remote sessions, should not accept Command
+//TEST_CASE("remotetest")
+//{
+//    SomeContext context{ L"MyLoggerContext: ", L"MyCommandContext: " };
+//    auto computer = L"computer";
+//    auto username = L"username";
+//    auto pass = L"pass";
+//    auto runspace = NativePowerShell_CreateRemoteRunspace(&context, Logger, computer, username, pass);
+//    context.runspace = runspace;
+//    RunScript(runspace, nullopt, L"[int12", true);
+//
+//    auto powershell = NativePowerShell_CreatePowerShell(runspace);
+//    //AddScriptSpecifyScope(powershell, L"c:\\code\\psh_host\\script.ps1", 1);
+//    //AddCommand(powershell, L"c:\\code\\go-net\\t3.ps1");
+//    //AddScriptSpecifyScope(powershell, L"write-host $pwd", 0);
+//    NativePowerShell_AddScriptSpecifyScope(powershell, L"hostname; 0;1;$null;dir c:\\", 1);
+//
+//    //AddCommandSpecifyScope(powershell, L"..\\..\\go-net\\t3.ps1", 0);
+//    //AddScriptSpecifyScope(powershell, L"$a = \"asdf\"", 0);
+//    //AddArgument(powershell, L"c:\\ddddddd");
+//    {
+//        Invoker invoke(powershell);
+//
+//        wcout << L"examining returned objects\n";
+//        for (unsigned int i = 0; i < invoke.count; ++i) {
+//            wcout << L"Got type: " << GetType(invoke[i]) << L"with value: " << GetToString(invoke[i]) << L'\n';
+//        }
+//
+//        auto powershell2 = NativePowerShell_CreatePowerShell(runspace);
+//
+//        // note below will write to output, not return objects	
+//        NativePowerShell_AddScriptSpecifyScope(powershell2,
+//            L"write-host 'about to enumerate directory';"
+//            L"write-host $args; $len = $args.length; write-host \"arg count $len\";"
+//            L"$args | ft | out-string | write-host;"
+//            L"@(1,'asdf',$null,$false) | send-hostcommand -message 'I sent the host a command' | write-host;"
+//            L"send-hostcommand -message 'I sent the host a command' | write-host", 0);
+//        NativePowerShell_AddArgument(powershell2, L"String to start");
+//        NativePowerShell_AddPSObjectArguments(powershell2, invoke.objects, invoke.count);
+//        NativePowerShell_AddArgument(powershell2, L"String to end");
+//
+//        context.powershell = powershell2;
+//        Invoker invoke2(powershell2);
+//        context.powershell = nullopt;
+//    }
+//    NativePowerShell_DeletePowershell(powershell);
+//
+//    powershell = NativePowerShell_CreatePowerShell(runspace);
+//    //AddScriptSpecifyScope(powershell, L"c:\\code\\psh_host\\script.ps1", 1);
+//    NativePowerShell_AddCommandSpecifyScope(powershell, L"..\\..\\go-net\\t3.ps1", 0);
+//    //AddScriptSpecifyScope(powershell, L"write-host $a", 0);
+//
+//    //AddCommand(powershell, L"c:\\code\\go-net\\t3.ps1");
+//    //AddArgument(powershell, L"c:\\ddddddd");
+//    {
+//        Invoker invoke(powershell);
+//    }
+//    NativePowerShell_DeletePowershell(powershell);
+//
+//    NativePowerShell_DeleteRunspace(runspace);
+//    std::cout << "Hello World!\n";
+//}
+
 int main(int argc, char* argv[]) {
     // global setup...
 

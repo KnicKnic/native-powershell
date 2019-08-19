@@ -12,6 +12,7 @@ using namespace System::Management::Automation;
 
 
 using namespace System;
+using namespace System::Security;
 using namespace System::Collections::Generic;
 using namespace System::Globalization;
 using namespace System::Management::Automation;
@@ -334,7 +335,75 @@ void SetISSEV(
 
   throw gcnew System::IndexOutOfRangeException;
 }
-NativePowerShell_RunspaceHandle NativePowerShell_CreateRunspace(void * context, NativePowerShell_ReceiveJsonCommand receiveJsonCommand, NativePowerShell_LogString BaseLogString)
+
+WSManConnectionInfo^ MakeConnectionInfo(const wchar_t* computerName, const wchar_t* username, const wchar_t* password) {
+
+    auto managedComputerName = msclr::interop::marshal_as<System::String^>(computerName);
+    auto uri = gcnew Uri("http://" + managedComputerName + ":5985/wsman");
+    //auto uri = gcnew Uri("https://" + managedComputerName + ":5986/wsman");
+    //auto uri = gcnew Uri("https://" + managedComputerName + "/OcsPowershell");
+    WSManConnectionInfo^ connection;
+
+    /*if (username != nullptr) {
+        auto managedUsername = msclr::interop::marshal_as<System::String^>(username);
+        auto managedPassword = msclr::interop::marshal_as<System::String^>(password);
+
+        SecureString^ securePass = gcnew SecureString();
+        for each (auto x in managedPassword)
+        {
+            securePass->AppendChar(x);
+        }
+        PSCredential^ managedCredentials = gcnew PSCredential(managedUsername, securePass);
+
+        connection = gcnew WSManConnectionInfo(uri, "http://schemas.microsoft.com/powershell/Microsoft.PowerShell", managedCredentials);
+    }
+    else {
+        connection = gcnew WSManConnectionInfo(uri);
+    }*/
+    //connection->ComputerName = managedComputerName;
+
+    if (username != nullptr) {
+        auto managedUsername = msclr::interop::marshal_as<System::String^>(username);
+        auto managedPassword = msclr::interop::marshal_as<System::String^>(password);
+
+        SecureString^ securePass = gcnew SecureString();
+        for each(auto x in managedPassword)
+        {
+            securePass->AppendChar(x);
+        }
+        PSCredential^ managedCredentials = gcnew PSCredential(managedUsername, securePass);
+        
+        connection = gcnew WSManConnectionInfo(
+            false,
+            managedComputerName,
+            5985,
+            msclr::interop::marshal_as<System::String^>(L"wsman"),
+            msclr::interop::marshal_as<System::String^>(L"http://schemas.microsoft.com/powershell/Microsoft.PowerShell"),
+            managedCredentials);
+    }
+    else {
+        connection = gcnew WSManConnectionInfo(uri);
+    }
+    //connection->AuthenticationMechanism = AuthenticationMechanism::Negotiate;
+
+    // Set the OperationTimeout property and OpenTimeout properties.
+    // The OperationTimeout property is used to tell Windows PowerShell
+    // how long to wait (in milliseconds) before timing out for an
+    // operation. The OpenTimeout property is used to tell Windows
+    // PowerShell how long to wait (in milliseconds) before timing out
+    // while establishing a remote connection.
+    connection->OperationTimeout = 4 * 60 * 1000; // 4 minutes.
+    connection->OpenTimeout = 1 * 60 * 1000; // 1 minute.
+
+    connection->SkipCACheck = true;
+    connection->SkipCNCheck = true;
+    connection->SkipRevocationCheck = true;
+
+    return connection;
+
+}
+
+NativePowerShell_RunspaceHandle CreateRunspaceInternal(void* context, NativePowerShell_ReceiveJsonCommand receiveJsonCommand, NativePowerShell_LogString BaseLogString, const wchar_t* computerName, const wchar_t* username, const wchar_t* password)
 {
     auto iss = InitialSessionState::CreateDefault();
     // Add the get-proc cmdlet to the InitialSessionState object.
@@ -348,15 +417,35 @@ NativePowerShell_RunspaceHandle NativePowerShell_CreateRunspace(void * context, 
     SetISSEV(iss->Variables, "VerbosePreference", System::Management::Automation::ActionPreference::Continue);
     SetISSEV(iss->Variables, "InformationPreference", System::Management::Automation::ActionPreference::Continue);
 
-    
+
     auto logger = gcnew Logger(context, BaseLogString);
     auto holder = gcnew RunspaceHolder(context, receiveJsonCommand, logger);
     auto host = gcnew MyHost(holder);
-    Runspace^ runspace = RunspaceFactory::CreateRunspace(host,iss);
+    Runspace^ runspace;
+    if (computerName == nullptr) {
+        runspace = RunspaceFactory::CreateRunspace(host, iss);
+    }
+    else {
+        auto connectionInfo = MakeConnectionInfo(computerName, username, password);
+
+        runspace = RunspaceFactory::CreateRunspace(connectionInfo, host, gcnew  TypeTable(gcnew array< String^ >(0)));
+        //runspace = RunspaceFactory::CreateRunspace(connectionInfo);
+    }
     holder->host = host;
     holder->runspace = runspace;
-	runspace->Open();
-	return HandleTable::InsertRunspace(holder);
+    runspace->Open();
+    return HandleTable::InsertRunspace(holder);
+}
+
+
+NativePowerShell_RunspaceHandle NativePowerShell_CreateRunspace(void * context, NativePowerShell_ReceiveJsonCommand receiveJsonCommand, NativePowerShell_LogString BaseLogString)
+{
+    return CreateRunspaceInternal(context, receiveJsonCommand, BaseLogString, nullptr, nullptr, nullptr);
+}
+
+NativePowerShell_RunspaceHandle NativePowerShell_CreateRemoteRunspace(void* context, NativePowerShell_LogString BaseLogString, const wchar_t* computerName, const wchar_t* username, const wchar_t* password)
+{
+    return CreateRunspaceInternal(context, nullptr, BaseLogString, computerName, username, password);
 }
 
 

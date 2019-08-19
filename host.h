@@ -57,7 +57,8 @@ extern "C" {
 	void NativePowerShell_DeletePowershell(NativePowerShell_PowerShellHandle handle);
 
 
-	NativePowerShell_RunspaceHandle NativePowerShell_CreateRunspace(void * context, NativePowerShell_ReceiveJsonCommand, NativePowerShell_LogString );
+	NativePowerShell_RunspaceHandle NativePowerShell_CreateRunspace(void* context, NativePowerShell_ReceiveJsonCommand, NativePowerShell_LogString);
+    NativePowerShell_RunspaceHandle NativePowerShell_CreateRemoteRunspace(void* context, NativePowerShell_LogString, const wchar_t* computerName, const wchar_t* username, const wchar_t * password);
 
 	void NativePowerShell_DeleteRunspace(NativePowerShell_RunspaceHandle handle);
 
