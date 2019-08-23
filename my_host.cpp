@@ -68,7 +68,7 @@
 
   inline void MyHostUserInterface::WriteLine(System::String^ message)
   {
-      GetLogger()->LogLine(message);
+      GetLogger()->LogLineInformation(message);
   }
 
   /// <summary>

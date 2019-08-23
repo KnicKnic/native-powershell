@@ -30,8 +30,26 @@ Lastly you can initialize all the logging functions for powershell. This means n
 ## Host to Powershell
 From hosting layer to powershell it is all strings and previously returned objects. The thought process is this string could be whatever you want and you can just convert it in powershell. I will give some examples.
 
+## Code overview
+
+1. host.cpp
+    1. this contains the logic to execute powershell sessions and is the bulk of the project
+1. host.h
+    1. the actual exported functions & types of this dll.
+1. my_host.cpp
+    1. this contains a custom PSHost that allows us to implement the callbacks for logging.
+        1. The only purpose we went through this implementation is to get logging callbacks.
+1. test_unit/test_unit.cpp
+    1. This contains a few unit tests.
+
+## running the unit tests
+
+1. open the solution
+1. Ensure that the test_unit project is set to startup project
+1. hit f5
 
 # Docs
+
 Generic info about writting a hosting app
 https://docs.microsoft.com/en-us/powershell/developer/windows-powershell
 

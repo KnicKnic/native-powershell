@@ -206,6 +206,25 @@ TEST_CASE("validate context") {
     REQUIRE(validateContext_validatedLogger);
     REQUIRE(validateContext_validatedCallback);
 }
+
+
+TEST_CASE("test logger") {
+    std::wstring resultString;
+    auto logger = +[](void* context, const wchar_t* s) {std::wcout << std::wstring(s); (*((std::wstring*)(context))) += std::wstring(s); };
+    
+    auto runspace = NativePowerShell_CreateRunspace((void*)&resultString, nullptr, logger);
+
+    auto powershell = NativePowerShell_CreatePowerShell(runspace);
+
+    REQUIRE(0 == NativePowerShell_AddScriptSpecifyScope(powershell, L"write-error a; write-debug b; write-information c; write-verbose d; write-warning e; write-error a; write-debug b; write-information c; write-verbose d; write-warning e;  ", FALSE));
+
+    Invoker invoke(powershell);
+
+    std::wstring strExpected(L"Debug: b\nInformation: c\nVerbose: d\nWarning: e\nDebug: b\nInformation: c\nVerbose: d\nWarning: e\nError: a\nError: a\n");
+
+    REQUIRE(resultString == strExpected);
+}
+
 TEST_CASE("nested runspace"){
         struct SomeContext2 {
             bool logged;

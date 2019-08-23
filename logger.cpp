@@ -69,7 +69,7 @@ void Logger::LogLineError(const std::wstring& log) {
     LogWrapperAddNewLine(LogErrorPtr, LogErrorDelegate, log);
 }
 void Logger::LogLine(const std::wstring& log) {
-    LogWrapperAddNewLine(BaseLogString, LogDelegate, log);
+    LogWrapperAddNewLine(BaseLogLinePtr, LogDelegate, log);
 }
 
 
