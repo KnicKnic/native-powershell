@@ -216,8 +216,10 @@ protected:
         //if $null is passed, then input is null. We will assume it is always 1 object(I think it is)
         if (input == nullptr) {
             inputObjects->Add(MakePSObject(nullptr));
+            //Console::WriteLine("got $null for input");
         }
         else {
+            //Console::WriteLine("got non null for input");
             for each (auto obj in input) {
                 inputObjects->Add(MakePSObject(obj));
             }

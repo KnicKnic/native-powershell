@@ -186,6 +186,19 @@ extern "C" {
     }
 }
 
+TEST_CASE("nullptr | send-hostcommand") {
+    auto command = +[](void* context, const wchar_t* s, NativePowerShell_PowerShellObject * input, unsigned long long inputCount, NativePowerShell_JsonReturnValues * returnValues)
+    {};
+
+    auto runspace = NativePowerShell_CreateRunspace((void*)0, command, nullptr);
+
+    auto powershell = NativePowerShell_CreatePowerShell(runspace);
+
+    REQUIRE(0 == NativePowerShell_AddScriptSpecifyScope(powershell, L"send-hostcommand -message \"hi\"; $nullptr | send-hostcommand -message \"hi\" ", FALSE));
+
+    Invoker invoke(powershell);
+}
+
 // declaring at global scope to make testing for validateContext simpler
 unsigned long long validateContext_contextValue = 94847573123111;
 bool validateContext_validatedLogger = false;
