@@ -54,19 +54,19 @@ void Logger::Log(const std::wstring & log) {
 
 
 void Logger::LogLineWarning(const std::wstring& log) {
-    LogWrapperAddNewLine(LogWarningPtr, LogWarningDelegate, log);
+    LogWrapperAddNewLine(LogWarningLinePtr, LogWarningDelegate, log);
 }
 void Logger::LogLineInformation(const std::wstring& log) {
-    LogWrapperAddNewLine(LogInformationPtr, LogInformationDelegate, log);
+    LogWrapperAddNewLine(LogInformationLinePtr, LogInformationDelegate, log);
 }
 void Logger::LogLineVerbose(const std::wstring& log) {
-    LogWrapperAddNewLine(LogVerbosePtr, LogVerboseDelegate, log);
+    LogWrapperAddNewLine(LogVerboseLinePtr, LogVerboseDelegate, log);
 }
 void Logger::LogLineDebug(const std::wstring& log) {
-    LogWrapperAddNewLine(LogDebugPtr, LogDebugDelegate, log);
+    LogWrapperAddNewLine(LogDebugLinePtr, LogDebugDelegate, log);
 }
 void Logger::LogLineError(const std::wstring& log) {
-    LogWrapperAddNewLine(LogErrorPtr, LogErrorDelegate, log);
+    LogWrapperAddNewLine(LogErrorLinePtr, LogErrorDelegate, log);
 }
 void Logger::LogLine(const std::wstring& log) {
     LogWrapperAddNewLine(BaseLogLinePtr, LogDelegate, log);

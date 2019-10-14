@@ -405,7 +405,7 @@ WSManConnectionInfo^ MakeConnectionInfo(const wchar_t* computerName, const wchar
 
 }
 
-NativePowerShell_RunspaceHandle CreateRunspaceInternal(void* context, NativePowerShell_ReceiveJsonCommand receiveJsonCommand, NativePowerShell_LogString BaseLogString, const wchar_t* computerName, const wchar_t* username, const wchar_t* password)
+NativePowerShell_RunspaceHandle CreateRunspaceInternal(void* context, NativePowerShell_ReceiveJsonCommand receiveJsonCommand, PNativePowerShell_LogString_Holder BaseLogString, const wchar_t* computerName, const wchar_t* username, const wchar_t* password)
 {
     auto iss = InitialSessionState::CreateDefault();
     // Add the get-proc cmdlet to the InitialSessionState object.
@@ -440,12 +440,12 @@ NativePowerShell_RunspaceHandle CreateRunspaceInternal(void* context, NativePowe
 }
 
 
-NativePowerShell_RunspaceHandle NativePowerShell_CreateRunspace(void * context, NativePowerShell_ReceiveJsonCommand receiveJsonCommand, NativePowerShell_LogString BaseLogString)
+NativePowerShell_RunspaceHandle NativePowerShell_CreateRunspace(void * context, NativePowerShell_ReceiveJsonCommand receiveJsonCommand, PNativePowerShell_LogString_Holder BaseLogString)
 {
     return CreateRunspaceInternal(context, receiveJsonCommand, BaseLogString, nullptr, nullptr, nullptr);
 }
 
-NativePowerShell_RunspaceHandle NativePowerShell_CreateRemoteRunspace(void* context, NativePowerShell_LogString BaseLogString, const wchar_t* computerName, const wchar_t* username, const wchar_t* password)
+NativePowerShell_RunspaceHandle NativePowerShell_CreateRemoteRunspace(void* context, PNativePowerShell_LogString_Holder BaseLogString, const wchar_t* computerName, const wchar_t* username, const wchar_t* password)
 {
     return CreateRunspaceInternal(context, nullptr, BaseLogString, computerName, username, password);
 }
