@@ -174,7 +174,9 @@ int main()
 {
     NativePowerShell_InitLibrary(MallocWrapper, free);
     SomeContext context{ L"MyLoggerContext: ", L"MyCommandContext: " };
-    auto runspace = NativePowerShell_CreateRunspace(&context, Command, Logger);
+    NativePowerShell_LogString_Holder logHolder = { 0 };
+    logHolder.Log = Logger;
+    auto runspace = NativePowerShell_CreateRunspace(&context, Command, &logHolder);
     globalRunspace = runspace;
     RunScript(runspace, nullptr, L"[int12", true);
 

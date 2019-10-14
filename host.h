@@ -14,7 +14,24 @@ extern "C" {
     #define NativePowerShell_InvalidPointer (void *)0;
     typedef void (*NativePowerShell_FreePointer)(void*);
     typedef unsigned char* (*NativePowerShell_AllocPointer)(unsigned long long size);
+    
     typedef void (*NativePowerShell_LogString)(void * context, const wchar_t* messages);
+    
+    // If Log is Null none of the logging works
+    typedef struct NativePowerShell_LogString_Holder_ {
+        NativePowerShell_LogString Log;
+        NativePowerShell_LogString LogError;
+        NativePowerShell_LogString LogWarning;
+        NativePowerShell_LogString LogInformation;
+        NativePowerShell_LogString LogVerbose;
+        NativePowerShell_LogString LogDebug;
+        NativePowerShell_LogString LogLine;
+        NativePowerShell_LogString LogErrorLine;
+        NativePowerShell_LogString LogWarningLine;
+        NativePowerShell_LogString LogInformationLine;
+        NativePowerShell_LogString LogVerboseLine;
+        NativePowerShell_LogString LogDebugLine;
+    }NativePowerShell_LogString_Holder, * PNativePowerShell_LogString_Holder;
 
     void NativePowerShell_InitLibrary( NativePowerShell_AllocPointer, NativePowerShell_FreePointer);
 
@@ -57,8 +74,8 @@ extern "C" {
 	void NativePowerShell_DeletePowershell(NativePowerShell_PowerShellHandle handle);
 
 
-	NativePowerShell_RunspaceHandle NativePowerShell_CreateRunspace(void* context, NativePowerShell_ReceiveJsonCommand, NativePowerShell_LogString);
-    NativePowerShell_RunspaceHandle NativePowerShell_CreateRemoteRunspace(void* context, NativePowerShell_LogString, const wchar_t* computerName, const wchar_t* username, const wchar_t * password);
+	NativePowerShell_RunspaceHandle NativePowerShell_CreateRunspace(void* context, NativePowerShell_ReceiveJsonCommand, PNativePowerShell_LogString_Holder);
+    NativePowerShell_RunspaceHandle NativePowerShell_CreateRemoteRunspace(void* context, PNativePowerShell_LogString_Holder, const wchar_t* computerName, const wchar_t* username, const wchar_t * password);
 
 	void NativePowerShell_DeleteRunspace(NativePowerShell_RunspaceHandle handle);
 

@@ -6,7 +6,21 @@
 #include <string>
 ref class Logger {
 public:
-    Logger(void * contextParam, NativePowerShell_LogString WriteFunc) : BaseLogString(WriteFunc), context(contextParam) {
+    Logger(void * contextParam, PNativePowerShell_LogString_Holder WriteFunc) : context(contextParam) {
+        if (WriteFunc != nullptr) {
+            BaseLogString = WriteFunc->Log;
+            LogWarningPtr = WriteFunc->LogWarning;
+            LogInformationPtr = WriteFunc->LogInformation;
+            LogVerbosePtr = WriteFunc->LogVerbose;
+            LogDebugPtr = WriteFunc->LogDebug;
+            LogErrorPtr = WriteFunc->LogError;
+            BaseLogLinePtr = WriteFunc->LogLine;
+            LogWarningLinePtr = WriteFunc->LogWarningLine;
+            LogInformationLinePtr = WriteFunc->LogInformationLine;
+            LogVerboseLinePtr = WriteFunc->LogVerboseLine;
+            LogDebugLinePtr = WriteFunc->LogDebugLine;
+            LogErrorLinePtr = WriteFunc->LogErrorLine;
+        }
         LogWarningDelegate = gcnew WriteLoggerDelegate(this, &Logger::LogWarning);
         LogInformationDelegate = gcnew WriteLoggerDelegate(this, &Logger::LogInformation);
         LogVerboseDelegate = gcnew WriteLoggerDelegate(this, &Logger::LogVerbose);

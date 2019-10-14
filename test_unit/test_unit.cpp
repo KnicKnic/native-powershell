@@ -204,12 +204,21 @@ unsigned long long validateContext_contextValue = 94847573123111;
 bool validateContext_validatedLogger = false;
 bool validateContext_validatedCallback = false;
 
+
+NativePowerShell_LogString_Holder MakeLogHolderFunction(NativePowerShell_LogString func) {
+    NativePowerShell_LogString_Holder logHolder = { 0 };
+    logHolder.Log = func;
+    return logHolder;
+}
+
+#define MAKE_LOG_HOLDER(SomeFunc) &(MakeLogHolderFunction(SomeFunc))
+
 TEST_CASE("validate context") {
     auto logger = +[](void* context, const wchar_t* s) {validateContext_validatedLogger = true;  REQUIRE(context != nullptr); REQUIRE((unsigned long long)context == validateContext_contextValue); };
     auto command = +[](void* context, const wchar_t* s, NativePowerShell_PowerShellObject * input, unsigned long long inputCount, NativePowerShell_JsonReturnValues * returnValues)
         {validateContext_validatedCallback = true;  REQUIRE(context != nullptr); REQUIRE((unsigned long long)context == validateContext_contextValue); };
 
-    auto runspace = NativePowerShell_CreateRunspace((void *)validateContext_contextValue, command, logger);
+    auto runspace = NativePowerShell_CreateRunspace((void *)validateContext_contextValue, command, MAKE_LOG_HOLDER(logger));
 
     auto powershell = NativePowerShell_CreatePowerShell(runspace);
 
@@ -225,7 +234,7 @@ TEST_CASE("test logger") {
     std::wstring resultString;
     auto logger = +[](void* context, const wchar_t* s) {std::wcout << std::wstring(s); (*((std::wstring*)(context))) += std::wstring(s); };
     
-    auto runspace = NativePowerShell_CreateRunspace((void*)&resultString, nullptr, logger);
+    auto runspace = NativePowerShell_CreateRunspace((void*)&resultString, nullptr, MAKE_LOG_HOLDER(logger));
 
     auto powershell = NativePowerShell_CreatePowerShell(runspace);
 
@@ -257,7 +266,7 @@ TEST_CASE("nested runspace"){
         return;
     };
     SomeContext2 context{ false };
-    auto runspace = NativePowerShell_CreateRunspace(&context, command, logger);
+    auto runspace = NativePowerShell_CreateRunspace(&context, command, MAKE_LOG_HOLDER(logger));
     context.runspace = runspace;
     REQUIRE(context.runspace != 0);
 
@@ -277,7 +286,7 @@ TEST_CASE("nested runspace"){
 TEST_CASE("tests", "[native-powershell]")
 {
     SomeContext context{ L"MyLoggerContext: ", L"MyCommandContext: " };
-    auto runspace = NativePowerShell_CreateRunspace(&context, Command, Logger);
+    auto runspace = NativePowerShell_CreateRunspace(&context, Command, MAKE_LOG_HOLDER(Logger));
     context.runspace = runspace;
     RunScript(runspace, nullopt, L"[int12", true);
 
