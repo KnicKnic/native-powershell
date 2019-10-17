@@ -68,7 +68,7 @@
 
   inline void MyHostUserInterface::WriteLine(System::String^ message)
   {
-      GetLogger()->LogLineInformation(message);
+      GetLogger()->LogLine(message);
   }
 
   /// <summary>
@@ -81,7 +81,7 @@
 
   inline void MyHostUserInterface::WriteLine(ConsoleColor foregroundColor, ConsoleColor backgroundColor, System::String^ message)
   {
-      GetLogger()->LogLineDebug(message);
+      GetLogger()->LogLine(message);
   }
 
   /// <summary>
