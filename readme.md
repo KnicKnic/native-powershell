@@ -1,15 +1,18 @@
 [![Build Status](https://dev.azure.com/oneeyedelf1/powershell.native/_apis/build/status/KnicKnic.native-powershell?branchName=master)](https://dev.azure.com/oneeyedelf1/powershell.native/_build/latest?definitionId=2&branchName=master)
 [![GitHub commits since latest release (branch)](https://img.shields.io/github/commits-since/KnicKnic/native-powershell/latest.svg)](https://github.com/KnicKnic/native-powershell/releases/latest)
 
-# This repository is under heavy development come back in 2 or three weeks!
-You could watch the repository in the mean time. I will create a release when I am done
-
 # Goal
 Create a C Dll that can be used to execute powershell scripts and powershell commands programmatically from other languages and get the results. 
 
 This is not a one way interaction like occurs via process exec. Callbacks are supported (powershell asynchronosly calling back into C) and you can keep context open / loaded across multiple invocations.
 
 I wrote this to create a golang binding (https://github.com/KnicKnic/go-powershell). Since everyone has C bindings, you can follow that to create your own language binding.
+
+
+## Status
+This project works and is used by the [go powershell binding](https://github.com/KnicKnic/go-powershell). However I have not gotten around to fully documenting it.
+
+Someone should add a sample project, but until then I suggest you look at the test code. This code should get refactored to seperate the supporting code from the rest. [test_unit\test_unit.cpp](test_unit\test_unit.cpp) start with `TEST_CASE("test logger")`
 
 ## Non Goals - Simple Managed hosting
 If you want to host managed DLL's you could directly create a managed host and do it that way. This offers a very simple alternative. Write some wrappers in powershell or directly in the hosting language via powershell statements and away you go.
