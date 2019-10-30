@@ -27,11 +27,25 @@ using namespace System::Management::Automation::Host;
 #include "logger.hpp"
 
 // Globals
-NativePowerShell_FreePointer NativePowerShell_FreePointerPtr = nullptr;
-NativePowerShell_AllocPointer NativePowerShell_AllocPointerPtr = nullptr;
+NativePowerShell_AllocPointer NativePowerShell_AllocPointerPtr = NativePowerShell_DefaultAlloc;
+NativePowerShell_FreePointer NativePowerShell_FreePointerPtr = NativePowerShell_DefaultFree;
 
 const NativePowerShell_PowerShellObject EmptyNativePowerShell_PowerShellObjectHandle = (NativePowerShell_PowerShellObject)(0);
 
+unsigned char* MallocHelper(unsigned long long size) noexcept {
+    auto ptr = (unsigned char*)malloc(size);
+    if(ptr == nullptr){
+        throw L"Failed to alloc";
+    }
+    return ptr;
+}
+
+unsigned char* NativePowerShell_DefaultAlloc(unsigned long long size){
+    return MallocHelper(size);
+}
+void NativePowerShell_DefaultFree(void* address){
+    return free(address);
+}
 
 void NativePowerShell_InitLibrary(NativePowerShell_AllocPointer allocPtr, NativePowerShell_FreePointer freePtr) {
     NativePowerShell_AllocPointerPtr = allocPtr;

@@ -54,7 +54,7 @@ extern "C" {
 
         // allocate return object holders
         returnValues->count = 1 + inputCount;
-        returnValues->objects = (NativePowerShell_GenericPowerShellObject*)malloc(sizeof(*(returnValues->objects)) * returnValues->count);
+        returnValues->objects = (NativePowerShell_GenericPowerShellObject*)NativePowerShell_DefaultAlloc(sizeof(*(returnValues->objects)) * returnValues->count);
         if (returnValues->objects == nullptr) {
             throw "memory allocation failed for return values in command";
         }
@@ -301,7 +301,6 @@ TEST_CASE("tests", "[native-powershell]")
 int main(int argc, char* argv[]) {
     // global setup...
 
-    native_powershell::Init();
     int result = Catch::Session().run(argc, argv);
 
     // global clean-up...

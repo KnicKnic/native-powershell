@@ -47,7 +47,7 @@ extern "C" {
 
         // allocate return object holders
         returnValues->count = 1 + inputCount;
-        returnValues->objects = (NativePowerShell_GenericPowerShellObject*)malloc(sizeof(*(returnValues->objects)) * returnValues->count);
+        returnValues->objects = (NativePowerShell_GenericPowerShellObject*)NativePowerShell_DefaultAlloc(sizeof(*(returnValues->objects)) * returnValues->count);
         if (returnValues->objects == nullptr) {
             throw "memory allocation failed for return values in command";
         }
@@ -72,7 +72,6 @@ extern "C" {
 
 int main()
 {
-    Init();
     SomeContext context{ L"MyLoggerContext: ", L"MyCommandContext: " };
     NativePowerShell_LogString_Holder logHolder = { 0 };
     logHolder.Log = Logger;

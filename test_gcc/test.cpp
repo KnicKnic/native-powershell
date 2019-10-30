@@ -19,7 +19,7 @@ const wchar_t* MallocCopy(const wchar_t* str)
     for (; str[s] != '\0'; ++s) {
     }
     ++s;
-    auto dest = (wchar_t*)malloc(s * sizeof(str[0]));
+    auto dest = (wchar_t*)NativePowerShell_DefaultAlloc(s * sizeof(str[0]));
     std::copy(str, str + s, dest);
     return (const wchar_t*)dest;
 }
@@ -48,7 +48,7 @@ extern "C" {
 
         // allocate return object holders
         returnValues->count = 1 + inputCount;
-        returnValues->objects = (NativePowerShell_GenericPowerShellObject*)malloc(sizeof(*(returnValues->objects)) * returnValues->count);
+        returnValues->objects = (NativePowerShell_GenericPowerShellObject*)NativePowerShell_DefaultAlloc(sizeof(*(returnValues->objects)) * returnValues->count);
         if (returnValues->objects == nullptr) {
             throw "memory allocation failed for return values in command";
         }
@@ -68,15 +68,11 @@ extern "C" {
 
         return;
     }
-
-    unsigned char* MallocWrapper(unsigned long long size) {
-        return (unsigned char*)malloc(size);
-    }
 }
 
     template<typename T>
     void FreeFunction(T* ptr) {
-        free((void *)ptr);
+        NativePowerShell_DefaultFree((void *)ptr);
     }
 
 template<typename T>
@@ -175,7 +171,6 @@ std::wstring GetToString(NativePowerShell_PowerShellObject handle) {
 
 int main()
 {
-    NativePowerShell_InitLibrary(MallocWrapper, free);
     SomeContext context{ L"MyLoggerContext: ", L"MyCommandContext: " };
     auto runspace = CreateRunspace(&context, Command, Logger);
     auto powershell = NativePowerShell_CreatePowerShell(runspace);
