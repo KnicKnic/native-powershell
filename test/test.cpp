@@ -15,16 +15,15 @@ using namespace native_powershell;
 struct SomeContext {
     std::wstring LoggerContext;
     std::wstring CommandContext;
+    NativePowerShell_RunspaceHandle runspace;
+    std::optional<NativePowerShell_PowerShellHandle> powershell;
 };
-
-NativePowerShell_RunspaceHandle globalRunspace;
-NativePowerShell_PowerShellHandle * globalPowershell = nullptr;
 
 extern "C" {
     void Logger(void* context, const wchar_t* s)
     {
         auto realContext = (SomeContext*)context;
-        std::wcout << realContext->LoggerContext << std::wstring(s) << L'\n';
+        std::wcout << realContext->LoggerContext << std::wstring(s);
     }
     void Command(void* context, const wchar_t* s, NativePowerShell_PowerShellObject* input, unsigned long long inputCount, NativePowerShell_JsonReturnValues* returnValues)
     {
@@ -34,13 +33,8 @@ extern "C" {
         std::wcout << realContext->CommandContext << std::wstring(s) << L'\n';
 
         for (size_t i = 0; i < inputCount; ++i) {
-
-            std::optional<NativePowerShell_PowerShellHandle> powershellHandle;
-            if (globalPowershell != nullptr) {
-                powershellHandle = *globalPowershell;
-            }
             // test nested creation
-            RunScript(globalRunspace, powershellHandle, L"[int]11", true);
+            RunScript(realContext->runspace, realContext->powershell, L"[int]11", true);
             auto& v = input[i];
             std::wcout << L"In data processing got " << GetToString(v) << L" of type " << GetType(v) << L'\n';
         }
@@ -72,11 +66,11 @@ extern "C" {
 
 int main()
 {
-    SomeContext context{ L"MyLoggerContext: ", L"MyCommandContext: " };
+    SomeContext context{ L"MyLoggerContext: ", L"MyCommandContext: ", NativePowerShell_InvalidHandleValue, std::nullopt };
     NativePowerShell_LogString_Holder logHolder = { 0 };
     logHolder.Log = Logger;
     auto runspace = NativePowerShell_CreateRunspace(&context, Command, &logHolder);
-    globalRunspace = runspace;
+    context.runspace = runspace;
     RunScript(runspace, std::nullopt, L"[int12", true);
 
     auto powershell = NativePowerShell_CreatePowerShell(runspace);
@@ -109,9 +103,9 @@ int main()
         NativePowerShell_AddPSObjectArguments(powershell2, invoke.objects, invoke.count);
         NativePowerShell_AddArgument(powershell2, L"String to end");
 
-        globalPowershell = &powershell2;
+        context.powershell = powershell2;
 		Invoker invoke2(powershell2);
-        globalPowershell = nullptr;
+        context.powershell = std::nullopt;
     }
     NativePowerShell_DeletePowershell(powershell);
 

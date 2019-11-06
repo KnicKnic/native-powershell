@@ -93,7 +93,7 @@ private:
 inline
 std::wstring CopyAndFree(const wchar_t* cStr) {
     if (cStr == nullptr) {
-        throw std::exception(__FUNCTION__  " got nullptr");
+        throw "CopyAndFree got nullptr";
     }
     std::wstring toRet(cStr);
     FreeFunction(cStr);
