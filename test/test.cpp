@@ -7,125 +7,23 @@
 #include "host.h"
 #include "utils/macros.hpp"
 #include "utils/zero_resetable.hpp"
+#include "utils/cpp_wrappers.hpp"
 
 using namespace std;
-
-std::wstring GetType(NativePowerShell_PowerShellObject handle);
-std::wstring GetToString(NativePowerShell_PowerShellObject handle);
-
-const wchar_t* MallocCopy(const wchar_t* str)
-{
-    if (str == nullptr)
-        return nullptr;
-
-    size_t s = 0;
-    for (; str[s] != '\0'; ++s) {
-    }
-    ++s;
-    auto dest = (wchar_t*)malloc(s * sizeof(str[0]));
-    std::copy(str, str + s, dest);
-    return (const wchar_t*)dest;
-}
+using namespace native_powershell;
 
 struct SomeContext {
     std::wstring LoggerContext;
     std::wstring CommandContext;
+    NativePowerShell_RunspaceHandle runspace;
+    std::optional<NativePowerShell_PowerShellHandle> powershell;
 };
-
-    template<typename T>
-    void FreeFunction(T* ptr) {
-        free((void *)ptr);
-    }
-
-
-class Invoker {
-public:
-    Invoker(NativePowerShell_PowerShellHandle handle) {
-        exception = NativePowerShell_InvokeCommand(handle, &objects, &count);
-    }
-	DENY_COPY(Invoker);
-	DEFAULT_MOVE(Invoker);
-    ~Invoker() {
-        for (unsigned int i = 0; i < count; ++i) {
-            NativePowerShell_ClosePowerShellObject(objects[i]);
-        }
-        if (objects != nullptr) {
-            free(objects);
-            count = 0;
-        }
-        NativePowerShell_ClosePowerShellObject(exception);
-    }
-    const bool CallFailed() const {
-        return exception.operator!=( NativePowerShell_InvalidHandleValue);
-    }
-	NativePowerShell_PowerShellObject operator[](unsigned int i) {
-		return objects[i];
-	}
-	NativePowerShell_PowerShellObject* results() {
-		return objects;
-	}
-	ZeroResetable< NativePowerShell_PowerShellObject*> objects;
-	ZeroResetable< unsigned int> count;
-	ZeroResetable< NativePowerShell_PowerShellObject> exception;
-private:
-};
-
-std::wstring CopyAndFree(const wchar_t * cStr) {
-    if (cStr == nullptr) {
-        throw std::exception(__FUNCTION__  " got nullptr");
-    }
-    wstring toRet(cStr);
-    FreeFunction(cStr);
-    return toRet;
-}
-
-std::wstring GetType(NativePowerShell_PowerShellObject handle) {
-    if('\0' == NativePowerShell_IsPSObjectNullptr(handle))
-        return CopyAndFree(NativePowerShell_GetPSObjectType(handle));
-    return L"nullptr";
-}
-std::wstring GetToString(NativePowerShell_PowerShellObject handle) {
-    if ('\0' == NativePowerShell_IsPSObjectNullptr(handle))
-        return CopyAndFree(NativePowerShell_GetPSObjectToString(handle));
-    return L"nullptr";
-
-}
-
-Invoker RunScript(NativePowerShell_RunspaceHandle& runspace, NativePowerShell_PowerShellHandle * parent, std::wstring command, bool useLocalScope, const std::vector<std::wstring>& elems) {
-
-    NativePowerShell_PowerShellHandle powershell;
-    if (parent != nullptr) {
-        powershell = NativePowerShell_CreatePowerShellNested(*parent);
-    }
-    else {
-        powershell = NativePowerShell_CreatePowerShell(runspace);
-    }
-    NativePowerShell_AddScriptSpecifyScope(powershell, command.c_str(), useLocalScope ? 1 : 0);
-    for (auto& arg : elems) {
-        NativePowerShell_AddArgument(powershell, arg.c_str());
-    }
-    auto results = Invoker(powershell);
-
-    NativePowerShell_DeletePowershell(powershell);
-    return results;
-}
-Invoker RunScript(NativePowerShell_RunspaceHandle& runspace, NativePowerShell_PowerShellHandle* parent, std::wstring command, bool useLocalScope, const std::wstring& elems) {
-    return RunScript(runspace, parent, command, useLocalScope, std::vector<std::wstring>({ elems }));
-}
-Invoker RunScript(NativePowerShell_RunspaceHandle& runspace, NativePowerShell_PowerShellHandle* parent, std::wstring command, bool useLocalScope) {
-    return RunScript(runspace, parent, command, useLocalScope, std::vector<std::wstring>({  }));
-}
-Invoker RunScript(NativePowerShell_RunspaceHandle& runspace, NativePowerShell_PowerShellHandle* parent, std::wstring command, bool useLocalScope, const std::wstring& elem1, const std::wstring& elem2) {
-    return RunScript(runspace, parent, command, useLocalScope, std::vector<std::wstring>({ elem1, elem2 }));
-}
-NativePowerShell_RunspaceHandle globalRunspace;
-NativePowerShell_PowerShellHandle * globalPowershell = nullptr;
 
 extern "C" {
     void Logger(void* context, const wchar_t* s)
     {
         auto realContext = (SomeContext*)context;
-        std::wcout << realContext->LoggerContext << std::wstring(s) << L'\n';
+        std::wcout << realContext->LoggerContext << std::wstring(s);
     }
     void Command(void* context, const wchar_t* s, NativePowerShell_PowerShellObject* input, unsigned long long inputCount, NativePowerShell_JsonReturnValues* returnValues)
     {
@@ -136,14 +34,14 @@ extern "C" {
 
         for (size_t i = 0; i < inputCount; ++i) {
             // test nested creation
-            RunScript(globalRunspace, globalPowershell, L"[int]11", true);
+            RunScript(realContext->runspace, realContext->powershell, L"[int]11", true);
             auto& v = input[i];
             std::wcout << L"In data processing got " << GetToString(v) << L" of type " << GetType(v) << L'\n';
         }
 
         // allocate return object holders
         returnValues->count = 1 + inputCount;
-        returnValues->objects = (NativePowerShell_GenericPowerShellObject*)malloc(sizeof(*(returnValues->objects)) * returnValues->count);
+        returnValues->objects = (NativePowerShell_GenericPowerShellObject*)NativePowerShell_DefaultAlloc(sizeof(*(returnValues->objects)) * returnValues->count);
         if (returnValues->objects == nullptr) {
             throw "memory allocation failed for return values in command";
         }
@@ -163,22 +61,17 @@ extern "C" {
 
         return;
     }
-
-    unsigned char* MallocWrapper(unsigned long long size) {
-        return (unsigned char*)malloc(size);
-    }
 }
 
 
 int main()
 {
-    NativePowerShell_InitLibrary(MallocWrapper, free);
-    SomeContext context{ L"MyLoggerContext: ", L"MyCommandContext: " };
+    SomeContext context{ L"MyLoggerContext: ", L"MyCommandContext: ", NativePowerShell_InvalidHandleValue, std::nullopt };
     NativePowerShell_LogString_Holder logHolder = { 0 };
     logHolder.Log = Logger;
     auto runspace = NativePowerShell_CreateRunspace(&context, Command, &logHolder);
-    globalRunspace = runspace;
-    RunScript(runspace, nullptr, L"[int12", true);
+    context.runspace = runspace;
+    RunScript(runspace, std::nullopt, L"[int12", true);
 
     auto powershell = NativePowerShell_CreatePowerShell(runspace);
     //AddScriptSpecifyScope(powershell, L"c:\\code\\psh_host\\script.ps1", 1);
@@ -210,9 +103,9 @@ int main()
         NativePowerShell_AddPSObjectArguments(powershell2, invoke.objects, invoke.count);
         NativePowerShell_AddArgument(powershell2, L"String to end");
 
-        globalPowershell = &powershell2;
+        context.powershell = powershell2;
 		Invoker invoke2(powershell2);
-        globalPowershell = nullptr;
+        context.powershell = std::nullopt;
     }
     NativePowerShell_DeletePowershell(powershell);
 

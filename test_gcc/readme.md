@@ -5,7 +5,7 @@ install choco
     1. install cmake
 
 mkdir build
-cmake -G "MinGW Makefiles" . -b build
+cmake -B build -G "MinGW Makefiles" .
 cmake --build build
 
 

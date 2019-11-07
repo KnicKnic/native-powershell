@@ -23,4 +23,6 @@ NativePowerShell_GetPSObjectToString
 NativePowerShell_IsPSObjectNullptr
 NativePowerShell_AddPSObjectHandle
 NativePowerShell_CreateRemoteRunspace
+NativePowerShell_DefaultAlloc
+NativePowerShell_DefaultFree
 
