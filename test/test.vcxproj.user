@@ -2,13 +2,9 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LocalDebuggerDebuggerType>Mixed</LocalDebuggerDebuggerType>
-    <LocalDebuggerCommand>C:\Users\nmaliwa\go\src\github.com\KnicKnic\go-powershell\pkg\powershell\f.exe</LocalDebuggerCommand>
-    <LocalDebuggerWorkingDirectory>C:\Users\nmaliwa\go\src\github.com\KnicKnic\go-powershell\pkg\powershell\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommand>C:\Users\nmaliwa\go\src\github.com\KnicKnic\go-powershell\pkg\powershell\f.exe</LocalDebuggerCommand>
-    <LocalDebuggerWorkingDirectory>C:\Users\nmaliwa\go\src\github.com\KnicKnic\go-powershell\pkg\powershell\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

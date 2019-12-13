@@ -158,4 +158,10 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+<Target Name="AfterBuild">
+        <ItemGroup>
+            <VCRedist Include="$(VCInstallDir)redist\$(VCRedistDir)*.dll"></VCRedist>
+        </ItemGroup>
+        <Copy SourceFiles="@(VCRedist)" DestinationFolder="$(OutputPath)"></Copy>
+</Target>
 </Project>
